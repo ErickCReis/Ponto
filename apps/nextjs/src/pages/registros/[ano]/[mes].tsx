@@ -1,14 +1,45 @@
 import dayjs from "dayjs";
-import { NextPage } from "next";
+import {
+  GetServerSideProps,
+  GetServerSidePropsContext,
+  InferGetServerSidePropsType,
+  NextPage,
+} from "next";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { z } from "zod";
 import { Header } from "~/components/header";
 import { api, RouterOutputs } from "~/utils/api";
 
 type TimeRecord = RouterOutputs["timeRecord"]["all"][number];
 
-const Registros: NextPage = () => {
+export const getServerSideProps: GetServerSideProps<{
+  ano: number;
+  mes: number;
+}> = async (context: GetServerSidePropsContext) => {
+  const { ano: anoParam, mes: mesParam } = context.query;
+
+  const ano = z.coerce.number().min(2000).parse(anoParam);
+  const mes = z.coerce.number().min(1).max(12).parse(mesParam);
+
+  return {
+    props: {
+      ano: ano,
+      mes: mes,
+    },
+  };
+};
+
+const Registros: NextPage<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ ano, mes }) => {
+  const date = dayjs()
+    .set("year", ano)
+    .set("month", mes - 1);
+
   const { data: timeRecord } = api.timeRecord.all.useQuery({
-    start: dayjs().startOf("month").toDate(),
-    end: dayjs().endOf("month").toDate(),
+    start: date.startOf("month").toDate(),
+    end: date.endOf("month").toDate(),
   });
 
   const groupByDay = timeRecord?.reduce((acc, time) => {
@@ -23,8 +54,22 @@ const Registros: NextPage = () => {
       <Header />
       <main className="container flex flex-col items-center">
         <div className="h-6"></div>
-        <h2 className="text-2xl font-bold uppercase">
-          {dayjs().format("MMMM [de] YYYY")}
+        <h2 className="flex text-2xl font-bold">
+          <Link
+            className="text-xl font-bold"
+            href={`/registros/${date.subtract(1, "month").format("YYYY/M")}`}
+          >
+            {"<"}
+          </Link>
+          <div className="min-w-[300px] px-4 text-center uppercase">
+            {date.format("MMMM [de] YYYY")}
+          </div>
+          <Link
+            className="text-xl font-bold"
+            href={`/registros/${date.add(1, "month").format("YYYY/M")}`}
+          >
+            {">"}
+          </Link>
         </h2>
         <div className="h-6"></div>
         <div className="flex flex-col">
