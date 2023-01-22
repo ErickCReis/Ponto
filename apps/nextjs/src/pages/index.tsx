@@ -1,26 +1,14 @@
 import { useEffect, useState } from "react";
 import type { NextPage } from "next";
-import Head from "next/head";
-import { signIn, signOut } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { Dialog } from "@headlessui/react";
 import dayjs from "dayjs";
-import { clsx } from "clsx";
 import { api } from "~/utils/api";
-
-const buttonStyle = clsx([
-  "rounded-lg",
-  "bg-white/10",
-  "px-6",
-  "py-3",
-  "font-semibold",
-  "text-white",
-  "no-underline",
-  "transition",
-  "hover:bg-white/20",
-]);
+import { Button } from "~/components/button";
+import { Header } from "~/components/header";
 
 const Clock = () => {
-  const [time, setTime] = useState(dayjs().format("HH:mm:00"));
+  const [time, setTime] = useState("--:--:--");
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -44,9 +32,7 @@ const MarkTimeButton = () => {
 
   return (
     <>
-      <button className={buttonStyle} onClick={() => setIsOpen(true)}>
-        Marcar ponto
-      </button>
+      <Button onClick={() => setIsOpen(true)}>Marcar ponto</Button>
       <Dialog
         open={isOpen}
         onClose={() => setIsOpen(false)}
@@ -71,7 +57,7 @@ const MarkTimeButton = () => {
               <button
                 className="cursor-pointer rounded border p-1"
                 onClick={() => {
-                  markTime({ time: new Date() });
+                  markTime();
                   setIsOpen(false);
                 }}
               >
@@ -93,9 +79,15 @@ const MarkTimeButton = () => {
 };
 
 const RegisteredTimes = () => {
-  const { data: times } = api.timeRecord.all.useQuery();
+  const { data: times } = api.timeRecord.all.useQuery({
+    start: dayjs().startOf("day").toDate(),
+    end: dayjs().endOf("day").toDate(),
+  });
 
-  if (!times || times.length == 0) return null;
+  if (!times || times.length == 0)
+    return (
+      <h2 className="py-6 text-xl font-bold">Nenhum ponto registrado hoje</h2>
+    );
 
   return (
     <div className="flex flex-col items-center">
@@ -106,7 +98,7 @@ const RegisteredTimes = () => {
         {times?.map((time) => (
           <div key={time.id} className="flex items-center">
             <div className="w-2" />
-            <div>{dayjs(time.date).format("HH:mm:ss")}</div>
+            <div>{dayjs(time.createdAt).format("HH:mm:ss")}</div>
           </div>
         ))}
       </div>
@@ -119,22 +111,7 @@ const Home: NextPage = () => {
 
   return (
     <div className="flex h-screen flex-col items-center bg-zinc-700 text-white">
-      <Head>
-        <title>Ponto</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <header className="flex w-full justify-between bg-zinc-800 p-4">
-        <h1 className="text-4xl font-bold">Ponto</h1>
-        {session?.user && (
-          <div className="flex items-center">
-            <span>{session.user.name}</span>
-            <div className="w-2" />
-            <button className={buttonStyle} onClick={() => void signOut()}>
-              Sair
-            </button>
-          </div>
-        )}
-      </header>
+      <Header />
       <main className="flex flex-col items-center">
         <div className="h-6"></div>
         <Clock />
@@ -145,9 +122,7 @@ const Home: NextPage = () => {
             <RegisteredTimes />
           </>
         ) : (
-          <button className={buttonStyle} onClick={() => void signIn()}>
-            Entrar
-          </button>
+          <Button onClick={() => void signIn()}>Entrar</Button>
         )}
       </main>
     </div>

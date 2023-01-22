@@ -13,7 +13,6 @@ datasource db {
 model TimeRecord {
     id        String   @id @default(cuid())
     userId    String
-    date      DateTime
     createdAt DateTime @default(now())
 
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
