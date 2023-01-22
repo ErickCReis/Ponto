@@ -6,7 +6,6 @@ import {
   NextPage,
 } from "next";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { z } from "zod";
 import { Header } from "~/components/header";
 import { api, RouterOutputs } from "~/utils/api";
