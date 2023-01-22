@@ -6,6 +6,11 @@ import type { AppType } from "next/app";
 
 import { api } from "~/utils/api";
 
+import "dayjs/locale/pt-br";
+import dayjs from "dayjs";
+
+dayjs.locale("pt-br");
+
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
