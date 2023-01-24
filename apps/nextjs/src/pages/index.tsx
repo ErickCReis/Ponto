@@ -124,7 +124,7 @@ export const getServerSideProps: GetServerSideProps<{
 
   return {
     props: {
-      time: displayTime(),
+      time: displayTime({ format: "HH:mm:ss" }),
       trpcState: ssg.dehydrate(),
     },
   };

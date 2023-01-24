@@ -60,7 +60,7 @@ export const getServerSideProps: GetServerSideProps<{
 const Registros: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ ano, mes }) => {
-  let date = dayjs()
+  const date = dayjs()
     .month(mes - 1)
     .year(ano);
 
@@ -69,12 +69,10 @@ const Registros: NextPage<
     end: date.endOf("month").toDate(),
   });
 
-  date = date.tz();
-
   const groupByDay = useMemo(
     () =>
       timeRecord?.reduce((acc, time) => {
-        const day = dayjs(time.createdAt).tz().date();
+        const day = dayjs(time.createdAt).date();
         if (!acc[day]) acc[day] = [];
         acc[day]?.push(time);
         return acc;
