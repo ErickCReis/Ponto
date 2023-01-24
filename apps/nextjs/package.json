@@ -15,7 +15,6 @@
     "@acme/auth": "*",
     "@acme/db": "*",
     "@acme/tailwind-config": "*",
-    "@headlessui/react": "^1.7.7",
     "@tanstack/react-query": "^4.20.4",
     "@trpc/client": "^10.8.1",
     "@trpc/next": "^10.8.1",

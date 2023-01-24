@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import type { NextPage } from "next";
 import { signIn } from "next-auth/react";
-import { Dialog } from "@headlessui/react";
 import dayjs from "dayjs";
 import { api } from "~/utils/api";
 import { Button } from "~/components/button";
@@ -22,58 +21,45 @@ const Clock = () => {
 
 const MarkTimeButton = () => {
   const utils = api.useContext();
-  const { mutate: markTime } = api.timeRecord.create.useMutation({
+  const { mutate: markTime, isLoading } = api.timeRecord.create.useMutation({
     async onSuccess() {
       await utils.timeRecord.all.refetch();
     },
   });
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isConfirm, setIsConfirm] = useState(false);
+
+  useEffect(() => {
+    if (!isConfirm) {
+      return;
+    }
+    const timeout = setTimeout(() => {
+      setIsConfirm(false);
+    }, 3000);
+    return () => clearTimeout(timeout);
+  }, [isConfirm]);
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>Marcar ponto</Button>
-      <Dialog
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        className="relative z-50"
+      <Button
+        onClick={() => {
+          if (isLoading) return;
+
+          if (!isConfirm) {
+            setIsConfirm(true);
+            return;
+          }
+
+          markTime();
+          setIsConfirm(false);
+        }}
       >
-        <div className="fixed inset-0 bg-black/70" aria-hidden="true" />
-
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="itens-center flex w-full max-w-sm flex-col rounded bg-white p-2">
-            <Dialog.Title className="text-center">Marcar Ponto</Dialog.Title>
-            <Dialog.Description className="text-center">
-              Deseja marcar o seu ponto?
-            </Dialog.Description>
-
-            <div className="h-3" />
-
-            <Clock />
-
-            <div className="h-3" />
-
-            <div className="flex justify-center">
-              <button
-                className="cursor-pointer rounded border p-1"
-                onClick={() => {
-                  markTime();
-                  setIsOpen(false);
-                }}
-              >
-                Sim
-              </button>
-              <div className="w-4" />
-              <button
-                className="cursor-pointer rounded border p-1"
-                onClick={() => setIsOpen(false)}
-              >
-                Agora não
-              </button>
-            </div>
-          </Dialog.Panel>
-        </div>
-      </Dialog>
+        {isLoading
+          ? "Salvando"
+          : isConfirm
+          ? "Clique para confirmar"
+          : "Marcar ponto"}
+      </Button>
     </>
   );
 };
