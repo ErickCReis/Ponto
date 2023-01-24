@@ -7,7 +7,7 @@ import type {
   NextPage,
 } from "next";
 import { signIn } from "next-auth/react";
-import dayjs from "~/utils/dayjs";
+import dayjs, { displayTime } from "~/utils/dayjs";
 import { api } from "~/utils/api";
 import { Button } from "~/components/button";
 import { Header } from "~/components/header";
@@ -22,7 +22,7 @@ const Clock = ({ initialTime }: { initialTime?: string }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTime(dayjs().format("HH:mm:ss"));
+      setTime(displayTime({ format: "HH:mm:ss" }));
     }, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -95,7 +95,7 @@ const RegisteredTimes = () => {
         {times?.map((time) => (
           <div key={time.id} className="flex items-center">
             <div className="w-2" />
-            <div>{dayjs(time.createdAt).format("HH:mm:ss")}</div>
+            <div>{displayTime({ date: time.createdAt })}</div>
           </div>
         ))}
       </div>
@@ -115,18 +115,16 @@ export const getServerSideProps: GetServerSideProps<{
     transformer: transformer,
   });
 
-  const date = dayjs().tz();
-
   await ssg.auth.getSession.prefetch();
 
   await ssg.timeRecord.all.prefetch({
-    start: date.startOf("day").toDate(),
-    end: date.endOf("day").toDate(),
+    start: dayjs().startOf("day").toDate(),
+    end: dayjs().endOf("day").toDate(),
   });
 
   return {
     props: {
-      time: date.format("HH:mm:ss"),
+      time: displayTime(),
       trpcState: ssg.dehydrate(),
     },
   };

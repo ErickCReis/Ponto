@@ -1,7 +1,7 @@
 import { appRouter } from "@acme/api";
 import { createInnerTRPCContext } from "@acme/api/src/trpc";
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import dayjs from "~/utils/dayjs";
+import dayjs, { displayTime } from "~/utils/dayjs";
 import {
   GetServerSideProps,
   GetServerSidePropsContext,
@@ -15,6 +15,7 @@ import { api, RouterOutputs } from "~/utils/api";
 import { getServerSession } from "@acme/auth";
 import { transformer } from "@acme/api/transformer";
 import { DehydratedState } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 type TimeRecord = RouterOutputs["timeRecord"]["all"][number];
 
@@ -28,11 +29,6 @@ export const getServerSideProps: GetServerSideProps<{
   const ano = z.coerce.number().min(2000).parse(anoParam);
   const mes = z.coerce.number().min(1).max(12).parse(mesParam);
 
-  const date = dayjs()
-    .month(mes - 1)
-    .year(ano)
-    .tz();
-
   const { req, res } = context;
   const session = await getServerSession({ req, res });
   const ssg = createProxySSGHelpers({
@@ -42,6 +38,10 @@ export const getServerSideProps: GetServerSideProps<{
   });
 
   await ssg.auth.getSession.prefetch();
+
+  const date = dayjs()
+    .month(mes - 1)
+    .year(ano);
 
   await ssg.timeRecord.all.prefetch({
     start: date.startOf("month").toDate(),
@@ -60,21 +60,27 @@ export const getServerSideProps: GetServerSideProps<{
 const Registros: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ ano, mes }) => {
-  const date = dayjs()
-    .set("year", ano)
-    .set("month", mes - 1);
+  let date = dayjs()
+    .month(mes - 1)
+    .year(ano);
 
   const { data: timeRecord } = api.timeRecord.all.useQuery({
     start: date.startOf("month").toDate(),
     end: date.endOf("month").toDate(),
   });
 
-  const groupByDay = timeRecord?.reduce((acc, time) => {
-    const day = dayjs(time.createdAt).date();
-    if (!acc[day]) acc[day] = [];
-    acc[day]?.push(time);
-    return acc;
-  }, {} as Record<number, TimeRecord[]>);
+  date = date.tz();
+
+  const groupByDay = useMemo(
+    () =>
+      timeRecord?.reduce((acc, time) => {
+        const day = dayjs(time.createdAt).tz().date();
+        if (!acc[day]) acc[day] = [];
+        acc[day]?.push(time);
+        return acc;
+      }, {} as Record<number, TimeRecord[]>),
+    [timeRecord],
+  );
 
   return (
     <div className="flex h-screen flex-col items-center bg-zinc-700 text-white">
@@ -110,7 +116,7 @@ const Registros: NextPage<
                 {times.map((time) => (
                   <div key={time.id} className="flex items-center">
                     <div className="w-4" />
-                    <div>{dayjs(time.createdAt).format("HH:mm:ss")}</div>
+                    <div>{displayTime({ date: time.createdAt })}</div>
                   </div>
                 ))}
               </div>
