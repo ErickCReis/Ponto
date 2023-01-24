@@ -1,8 +1,7 @@
 import { appRouter } from "@acme/api";
 import { createInnerTRPCContext } from "@acme/api/src/trpc";
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import dayjs from "dayjs";
-import "dayjs/locale/pt-br";
+import dayjs from "~/utils/dayjs";
 import {
   GetServerSideProps,
   GetServerSidePropsContext,
@@ -16,8 +15,6 @@ import { api, RouterOutputs } from "~/utils/api";
 import { getServerSession } from "@acme/auth";
 import { transformer } from "@acme/api/transformer";
 import { DehydratedState } from "@tanstack/react-query";
-
-dayjs.locale("pt-br");
 
 type TimeRecord = RouterOutputs["timeRecord"]["all"][number];
 
@@ -33,9 +30,8 @@ export const getServerSideProps: GetServerSideProps<{
 
   const date = dayjs()
     .month(mes - 1)
-    .year(ano);
-
-  console.log(dayjs.locale());
+    .year(ano)
+    .tz();
 
   const { req, res } = context;
   const session = await getServerSession({ req, res });

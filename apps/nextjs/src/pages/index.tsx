@@ -7,8 +7,7 @@ import type {
   NextPage,
 } from "next";
 import { signIn } from "next-auth/react";
-import dayjs from "dayjs";
-import "dayjs/locale/pt-br";
+import dayjs from "~/utils/dayjs";
 import { api } from "~/utils/api";
 import { Button } from "~/components/button";
 import { Header } from "~/components/header";
@@ -17,8 +16,6 @@ import { createInnerTRPCContext } from "@acme/api/src/trpc";
 import { transformer } from "@acme/api/transformer";
 import { DehydratedState } from "@tanstack/react-query";
 import { getServerSession } from "@acme/auth";
-
-dayjs.locale("pt-br");
 
 const Clock = ({ initialTime }: { initialTime?: string }) => {
   const [time, setTime] = useState(initialTime ?? "--:--:--");
@@ -118,7 +115,7 @@ export const getServerSideProps: GetServerSideProps<{
     transformer: transformer,
   });
 
-  const date = dayjs();
+  const date = dayjs().tz();
 
   await ssg.auth.getSession.prefetch();
 
@@ -129,7 +126,7 @@ export const getServerSideProps: GetServerSideProps<{
 
   return {
     props: {
-      time: dayjs().format("HH:mm:ss"),
+      time: date.format("HH:mm:ss"),
       trpcState: ssg.dehydrate(),
     },
   };
