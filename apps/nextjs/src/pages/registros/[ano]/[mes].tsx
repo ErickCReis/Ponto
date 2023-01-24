@@ -1,3 +1,6 @@
+import { appRouter } from "@acme/api";
+import { createInnerTRPCContext } from "@acme/api/src/trpc";
+import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import dayjs from "dayjs";
 import {
   GetServerSideProps,
@@ -9,22 +12,45 @@ import Link from "next/link";
 import { z } from "zod";
 import { Header } from "~/components/header";
 import { api, RouterOutputs } from "~/utils/api";
+import { getServerSession } from "@acme/auth";
+import { transformer } from "@acme/api/transformer";
+import { DehydratedState } from "@tanstack/react-query";
 
 type TimeRecord = RouterOutputs["timeRecord"]["all"][number];
 
 export const getServerSideProps: GetServerSideProps<{
   ano: number;
   mes: number;
+  trpcState: DehydratedState;
 }> = async (context: GetServerSidePropsContext) => {
   const { ano: anoParam, mes: mesParam } = context.query;
 
   const ano = z.coerce.number().min(2000).parse(anoParam);
   const mes = z.coerce.number().min(1).max(12).parse(mesParam);
+  const date = dayjs()
+    .set("year", ano)
+    .set("month", mes - 1);
+
+  const { req, res } = context;
+  const session = await getServerSession({ req, res });
+  const ssg = createProxySSGHelpers({
+    router: appRouter,
+    ctx: createInnerTRPCContext({ session }),
+    transformer: transformer,
+  });
+
+  await ssg.auth.getSession.prefetch();
+
+  await ssg.timeRecord.all.prefetch({
+    start: date.startOf("month").toDate(),
+    end: date.endOf("month").toDate(),
+  });
 
   return {
     props: {
-      ano: ano,
-      mes: mes,
+      ano,
+      mes,
+      trpcState: ssg.dehydrate(),
     },
   };
 };

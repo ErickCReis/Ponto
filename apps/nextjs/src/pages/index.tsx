@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
-import type { NextPage } from "next";
+import { createProxySSGHelpers } from "@trpc/react-query/ssg";
+import type {
+  GetServerSideProps,
+  GetServerSidePropsContext,
+  InferGetServerSidePropsType,
+  NextPage,
+} from "next";
 import { signIn } from "next-auth/react";
 import dayjs from "dayjs";
 import { api } from "~/utils/api";
 import { Button } from "~/components/button";
 import { Header } from "~/components/header";
+import { appRouter } from "@acme/api";
+import { createInnerTRPCContext } from "@acme/api/src/trpc";
+import { transformer } from "@acme/api/transformer";
+import { DehydratedState } from "@tanstack/react-query";
+import { getServerSession } from "@acme/auth";
 
-const Clock = () => {
-  const [time, setTime] = useState("--:--:--");
+const Clock = ({ initialTime }: { initialTime?: string }) => {
+  const [time, setTime] = useState(initialTime ?? "--:--:--");
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -92,7 +103,38 @@ const RegisteredTimes = () => {
   );
 };
 
-const Home: NextPage = () => {
+export const getServerSideProps: GetServerSideProps<{
+  time: string;
+  trpcState: DehydratedState;
+}> = async (context: GetServerSidePropsContext) => {
+  const { req, res } = context;
+  const session = await getServerSession({ req, res });
+  const ssg = createProxySSGHelpers({
+    router: appRouter,
+    ctx: createInnerTRPCContext({ session }),
+    transformer: transformer,
+  });
+
+  const date = dayjs();
+
+  await ssg.auth.getSession.prefetch();
+
+  await ssg.timeRecord.all.prefetch({
+    start: date.startOf("day").toDate(),
+    end: date.endOf("day").toDate(),
+  });
+
+  return {
+    props: {
+      time: dayjs().format("HH:mm:ss"),
+      trpcState: ssg.dehydrate(),
+    },
+  };
+};
+
+const Home: NextPage<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ time }) => {
   const { data: session } = api.auth.getSession.useQuery();
 
   return (
@@ -100,7 +142,7 @@ const Home: NextPage = () => {
       <Header />
       <main className="flex flex-col items-center">
         <div className="h-6"></div>
-        <Clock />
+        <Clock initialTime={time} />
         <div className="h-6"></div>
         {session?.user ? (
           <>
