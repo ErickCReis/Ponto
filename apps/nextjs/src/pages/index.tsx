@@ -8,6 +8,7 @@ import type {
 } from "next";
 import { signIn } from "next-auth/react";
 import dayjs from "dayjs";
+import "dayjs/locale/pt-br";
 import { api } from "~/utils/api";
 import { Button } from "~/components/button";
 import { Header } from "~/components/header";
@@ -16,6 +17,8 @@ import { createInnerTRPCContext } from "@acme/api/src/trpc";
 import { transformer } from "@acme/api/transformer";
 import { DehydratedState } from "@tanstack/react-query";
 import { getServerSession } from "@acme/auth";
+
+dayjs.locale("pt-br");
 
 const Clock = ({ initialTime }: { initialTime?: string }) => {
   const [time, setTime] = useState(initialTime ?? "--:--:--");
