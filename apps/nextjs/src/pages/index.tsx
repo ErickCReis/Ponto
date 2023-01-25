@@ -10,7 +10,6 @@ import { signIn } from "next-auth/react";
 import dayjs, { displayTime } from "~/utils/dayjs";
 import { api } from "~/utils/api";
 import { Button } from "~/components/button";
-import { Header } from "~/components/header";
 import { appRouter } from "@acme/api";
 import { createInnerTRPCContext } from "@acme/api/src/trpc";
 import { transformer } from "@acme/api/transformer";
@@ -136,22 +135,19 @@ const Home: NextPage<
   const { data: session } = api.auth.getSession.useQuery();
 
   return (
-    <div className="flex h-screen flex-col items-center bg-zinc-700 text-white">
-      <Header />
-      <main className="flex flex-col items-center">
-        <div className="h-6"></div>
-        <Clock initialTime={time} />
-        <div className="h-6"></div>
-        {session?.user ? (
-          <>
-            <MarkTimeButton />
-            <RegisteredTimes />
-          </>
-        ) : (
-          <Button onClick={() => void signIn()}>Entrar</Button>
-        )}
-      </main>
-    </div>
+    <>
+      <div className="h-6"></div>
+      <Clock initialTime={time} />
+      <div className="h-6"></div>
+      {session?.user ? (
+        <>
+          <MarkTimeButton />
+          <RegisteredTimes />
+        </>
+      ) : (
+        <Button onClick={() => void signIn()}>Entrar</Button>
+      )}
+    </>
   );
 };
 

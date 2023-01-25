@@ -10,7 +10,6 @@ import {
 } from "next";
 import Link from "next/link";
 import { z } from "zod";
-import { Header } from "~/components/header";
 import { api, RouterOutputs } from "~/utils/api";
 import { getServerSession } from "@acme/auth";
 import { transformer } from "@acme/api/transformer";
@@ -81,48 +80,45 @@ const Registros: NextPage<
   );
 
   return (
-    <div className="flex h-screen flex-col items-center bg-zinc-700 text-white">
-      <Header />
-      <main className="container flex flex-col items-center">
-        <div className="h-6"></div>
-        <h2 className="flex text-2xl font-bold">
-          <Link
-            className="text-xl font-bold"
-            href={`/registros/${date.subtract(1, "month").format("YYYY/M")}`}
-          >
-            {"<"}
-          </Link>
-          <div className="min-w-[300px] px-4 text-center uppercase">
-            {date.format("MMMM [de] YYYY")}
-          </div>
-          <Link
-            className="text-xl font-bold"
-            href={`/registros/${date.add(1, "month").format("YYYY/M")}`}
-          >
-            {">"}
-          </Link>
-        </h2>
-        <div className="h-6"></div>
-        <div className="flex flex-col">
-          {Object.entries(groupByDay ?? {}).map(([day, times]) => (
-            <div key={day} className="flex py-2">
-              <h3 className="text-xl font-bold">
-                {day.toString().padStart(2, "0")}
-              </h3>
-              <div className="w-4"></div>
-              <div className="flex">
-                {times.map((time) => (
-                  <div key={time.id} className="flex items-center">
-                    <div className="w-4" />
-                    <div>{displayTime({ date: time.createdAt })}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+    <>
+      <div className="h-6"></div>
+      <h2 className="flex text-2xl font-bold">
+        <Link
+          className="text-xl font-bold"
+          href={`/registros/${date.subtract(1, "month").format("YYYY/M")}`}
+        >
+          {"<"}
+        </Link>
+        <div className="min-w-[300px] px-4 text-center uppercase">
+          {date.format("MMMM [de] YYYY")}
         </div>
-      </main>
-    </div>
+        <Link
+          className="text-xl font-bold"
+          href={`/registros/${date.add(1, "month").format("YYYY/M")}`}
+        >
+          {">"}
+        </Link>
+      </h2>
+      <div className="h-6"></div>
+      <div className="flex flex-col">
+        {Object.entries(groupByDay ?? {}).map(([day, times]) => (
+          <div key={day} className="flex py-2">
+            <h3 className="text-xl font-bold">
+              {day.toString().padStart(2, "0")}
+            </h3>
+            <div className="w-4"></div>
+            <div className="flex">
+              {times.map((time) => (
+                <div key={time.id} className="flex items-center">
+                  <div className="w-4" />
+                  <div>{displayTime({ date: time.createdAt })}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 };
 
