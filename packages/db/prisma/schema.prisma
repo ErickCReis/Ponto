@@ -13,9 +13,37 @@ datasource db {
 model TimeRecord {
     id        String   @id @default(cuid())
     userId    String
+    teamId    String
     createdAt DateTime @default(now())
 
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+}
+
+model Team {
+    id         String       @id @default(cuid())
+    name       String
+    createdAt  DateTime     @default(now())
+    updatedAt  DateTime     @updatedAt
+    TeamMember TeamMember[]
+    TimeRecord TimeRecord[]
+}
+
+model TeamMember {
+    id        String   @id @default(cuid())
+    teamId    String
+    userId    String
+    role      TeamRole @default(MEMBER)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum TeamRole {
+    ADMIN
+    MEMBER
 }
 
 // NextAuth.js Models
@@ -57,6 +85,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
     TimeRecord    TimeRecord[]
+    TeamMember    TeamMember[]
 }
 
 model VerificationToken {

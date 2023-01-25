@@ -9,8 +9,6 @@ export const timeRecordRouter = createTRPCRouter({
         .optional(),
     )
     .query(({ ctx, input }) => {
-      console.log(input);
-
       return ctx.prisma.timeRecord.findMany({
         where: {
           userId: ctx.session.user.id,
@@ -18,11 +16,18 @@ export const timeRecordRouter = createTRPCRouter({
         },
       });
     }),
-  create: protectedProcedure.mutation(({ ctx }) => {
-    return ctx.prisma.timeRecord.create({
-      data: {
-        user: { connect: { id: ctx.session.user.id } },
-      },
-    });
-  }),
+  create: protectedProcedure
+    .input(
+      z.object({
+        teamId: z.string(),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      return ctx.prisma.timeRecord.create({
+        data: {
+          userId: ctx.session.user.id,
+          teamId: input.teamId,
+        },
+      });
+    }),
 });
