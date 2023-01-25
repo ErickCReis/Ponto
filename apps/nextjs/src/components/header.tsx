@@ -1,4 +1,3 @@
-import Head from "next/head";
 import { signOut } from "next-auth/react";
 import { api } from "~/utils/api";
 import { Button } from "./button";
@@ -24,7 +23,7 @@ export const Header = () => {
       </ul>
       {session?.user && (
         <div className="flex items-center">
-          <span>{session.user.name}</span>
+          <Link href="/perfil">{session.user.name}</Link>
           <div className="w-2" />
           <Button onClick={() => void signOut()}>Sair</Button>
         </div>
