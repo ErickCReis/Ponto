@@ -2,9 +2,13 @@ import { signOut } from "next-auth/react";
 import { api } from "~/utils/api";
 import { Button } from "./button";
 import Link from "next/link";
-import dayjs from "dayjs";
+import dayjs from "~/utils/dayjs";
+import { useRouter } from "next/router";
+import { z } from "zod";
 
 export const Header = () => {
+  const { query } = useRouter();
+  const teamId = z.coerce.string().cuid().optional().parse(query.time);
   const { data: session } = api.auth.getSession.useQuery();
 
   const ano = dayjs().format("YYYY");
@@ -17,9 +21,11 @@ export const Header = () => {
           <Link href="/">Ponto</Link>
         </li>
         <div className="w-4" />
-        <li>
-          <Link href={`/registros/${ano}/${mes}`}>Registros</Link>
-        </li>
+        {teamId && (
+          <li>
+            <Link href={`/${teamId}/registros/${ano}/${mes}`}>Registros</Link>
+          </li>
+        )}
       </ul>
       {session?.user && (
         <div className="flex items-center">

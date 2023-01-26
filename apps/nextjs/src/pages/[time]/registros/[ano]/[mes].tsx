@@ -21,12 +21,14 @@ type TimeRecord = RouterOutputs["timeRecord"]["all"][number];
 export const getServerSideProps: GetServerSideProps<{
   ano: number;
   mes: number;
+  teamId: string;
   trpcState: DehydratedState;
 }> = async (context: GetServerSidePropsContext) => {
-  const { ano: anoParam, mes: mesParam } = context.query;
+  const { ano: anoParam, mes: mesParam, time: teamParam } = context.query;
 
   const ano = z.coerce.number().min(2000).parse(anoParam);
   const mes = z.coerce.number().min(1).max(12).parse(mesParam);
+  const teamId = z.coerce.string().cuid().parse(teamParam);
 
   const { req, res } = context;
   const session = await getServerSession({ req, res });
@@ -45,12 +47,16 @@ export const getServerSideProps: GetServerSideProps<{
   await ssg.timeRecord.all.prefetch({
     start: date.startOf("month").toDate(),
     end: date.endOf("month").toDate(),
+    teamId,
   });
+
+  await ssg.team.get.prefetch(teamId);
 
   return {
     props: {
       ano,
       mes,
+      teamId,
       trpcState: ssg.dehydrate(),
     },
   };
@@ -58,7 +64,7 @@ export const getServerSideProps: GetServerSideProps<{
 
 const Registros: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ ano, mes }) => {
+> = ({ ano, mes, teamId }) => {
   const date = dayjs()
     .month(mes - 1)
     .year(ano);
@@ -66,7 +72,10 @@ const Registros: NextPage<
   const { data: timeRecord } = api.timeRecord.all.useQuery({
     start: date.startOf("month").toDate(),
     end: date.endOf("month").toDate(),
+    teamId,
   });
+
+  const { data: team } = api.team.get.useQuery(teamId);
 
   const groupByDay = useMemo(
     () =>
@@ -81,6 +90,10 @@ const Registros: NextPage<
 
   return (
     <>
+      <div className="h-6"></div>
+      <h1 className="text-center text-4xl font-bold">
+        {team?.name || "Carregando..."}
+      </h1>
       <div className="h-6"></div>
       <h2 className="flex text-2xl font-bold">
         <Link

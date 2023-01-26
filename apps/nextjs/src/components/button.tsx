@@ -1,6 +1,6 @@
 import clsx from "clsx";
 
-const buttonStyle = clsx([
+export const defaultStyle = clsx([
   "rounded-lg",
   "bg-white/10",
   "px-6",
@@ -12,15 +12,11 @@ const buttonStyle = clsx([
   "hover:bg-white/20",
 ]);
 
-export const Button = ({
-  children,
-  onClick,
-}: {
-  children?: React.ReactNode;
-  onClick: () => void;
-}) => {
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
+
+export const Button: React.FC<ButtonProps> = ({ children, onClick }) => {
   return (
-    <button className={buttonStyle} onClick={onClick}>
+    <button className={defaultStyle} onClick={onClick}>
       {children}
     </button>
   );
