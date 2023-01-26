@@ -12,15 +12,15 @@ const CriarSchema = z.object({
 const Criar: NextPage = () => {
   const router = useRouter();
   const { mutate, isLoading } = api.team.create.useMutation({
-    onSuccess: () => {
-      router.push("/");
+    onSuccess: async () => {
+      await router.push("/");
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof CriarSchema>) => {
+  const onSubmit = (values: z.infer<typeof CriarSchema>) => {
     if (isLoading) return;
 
-    await mutate(values);
+    mutate(values);
   };
 
   return (

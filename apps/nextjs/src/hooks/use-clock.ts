@@ -17,7 +17,7 @@ export const useClock = ({
       setTime(displayTime({ format: format }));
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [format]);
 
   return time;
 };
