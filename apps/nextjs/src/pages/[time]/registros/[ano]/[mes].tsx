@@ -98,7 +98,9 @@ const Registros: NextPage<
       <h2 className="flex text-2xl font-bold">
         <Link
           className="text-xl font-bold"
-          href={`/registros/${date.subtract(1, "month").format("YYYY/M")}`}
+          href={`/${teamId}/registros/${date
+            .subtract(1, "month")
+            .format("YYYY/M")}`}
         >
           {"<"}
         </Link>
@@ -107,7 +109,7 @@ const Registros: NextPage<
         </div>
         <Link
           className="text-xl font-bold"
-          href={`/registros/${date.add(1, "month").format("YYYY/M")}`}
+          href={`/${teamId}/registros/${date.add(1, "month").format("YYYY/M")}`}
         >
           {">"}
         </Link>
