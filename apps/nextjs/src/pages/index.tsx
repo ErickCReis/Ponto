@@ -1,19 +1,11 @@
 import { Team } from ".prisma/client";
-import { appRouter } from "@acme/api";
-import { createInnerTRPCContext } from "@acme/api/src/trpc";
-import { transformer } from "@acme/api/transformer";
-import { getServerSession } from "@acme/auth";
-import { DehydratedState } from "@tanstack/react-query";
-import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import type {
-  GetServerSideProps,
-  GetServerSidePropsContext,
-  NextPage,
-} from "next";
+import type { NextPage } from "next";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { z } from "zod";
 import { Button, defaultStyle } from "~/components/button";
 import { api } from "~/utils/api";
+import { createSSR } from "~/utils/ssr";
 
 const CardTeam: React.FC<{ team: Team }> = ({ team }) => {
   return (
@@ -26,28 +18,14 @@ const CardTeam: React.FC<{ team: Team }> = ({ team }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps<{
-  trpcState: DehydratedState;
-}> = async (context: GetServerSidePropsContext) => {
-  const { req, res } = context;
-  const session = await getServerSession({ req, res });
-
-  const ssg = createProxySSGHelpers({
-    router: appRouter,
-    ctx: createInnerTRPCContext({ session }),
-    transformer: transformer,
-  });
-
-  await ssg.auth.getSession.prefetch();
-
-  await ssg.team.all.prefetch();
-
-  return {
-    props: {
-      trpcState: ssg.dehydrate(),
-    },
-  };
-};
+export const getServerSideProps = createSSR(
+  z.object({}),
+  z.void(),
+  async (ssr, _) => {
+    await ssr.auth.getSession.prefetch();
+    await ssr.team.all.prefetch();
+  },
+);
 
 const Home: NextPage = () => {
   const { data: session } = api.auth.getSession.useQuery();

@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import type {
-  GetServerSideProps,
-  GetServerSidePropsContext,
   InferGetServerSidePropsType,
   NextPage,
 } from "next";
@@ -9,14 +7,9 @@ import { signIn } from "next-auth/react";
 import dayjs, { displayTime } from "~/utils/dayjs";
 import { api } from "~/utils/api";
 import { Button } from "~/components/button";
-import { DehydratedState } from "@tanstack/react-query";
 import { z } from "zod";
-import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import { appRouter } from "@acme/api";
-import { createInnerTRPCContext } from "@acme/api/src/trpc";
-import { transformer } from "@acme/api/transformer";
-import { getServerSession } from "@acme/auth";
 import { useClock } from "~/hooks/use-clock";
+import { createSSR } from "~/utils/ssr";
 
 const Clock = ({ initialTime }: { initialTime?: string }) => {
   const time = useClock({ initialTime });
@@ -98,42 +91,46 @@ const RegisteredTimes = ({ teamId }: { teamId: string }) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps<{
-  clock: string;
-  teamId: string;
-  trpcState: DehydratedState;
-}> = async (context: GetServerSidePropsContext) => {
-  const { time: teamParam } = context.query;
+export const getServerSideProps = createSSR(
+  z.object({
+    teamId: z.coerce.string().cuid(),
+  }),
+  z.object({
+    clock: z.string(),
+  }),
+  async (ssr, { teamId }) => {
+    const session = await ssr.auth.getSession.fetch();
 
-  const teamId = z.coerce.string().cuid().parse(teamParam);
+    if (!session?.user) {
+      return {
+        result: "redirect",
+        destination: "/",
+      };
+    }
 
-  const { req, res } = context;
-  const session = await getServerSession({ req, res });
+    const team = await ssr.team.get.fetch(teamId);
 
-  const ssg = createProxySSGHelpers({
-    router: appRouter,
-    ctx: createInnerTRPCContext({ session }),
-    transformer: transformer,
-  });
+    if (!team) {
+      return {
+        result: "redirect",
+        destination: "/",
+      };
+    }
 
-  await ssg.auth.getSession.prefetch();
-
-  await ssg.timeRecord.all.prefetch({
-    start: dayjs().startOf("day").toDate(),
-    end: dayjs().endOf("day").toDate(),
-    teamId,
-  });
-
-  await ssg.team.get.prefetch(teamId);
-
-  return {
-    props: {
-      clock: displayTime({ format: "HH:mm:ss" }),
+    await ssr.timeRecord.all.prefetch({
+      start: dayjs().startOf("day").toDate(),
+      end: dayjs().endOf("day").toDate(),
       teamId,
-      trpcState: ssg.dehydrate(),
-    },
-  };
-};
+    });
+
+    return {
+      result: "success",
+      data: {
+        clock: displayTime({ format: "HH:mm:ss" }),
+      },
+    };
+  },
+);
 
 const Time: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>

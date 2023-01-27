@@ -1,73 +1,62 @@
-import { appRouter } from "@acme/api";
-import { createInnerTRPCContext } from "@acme/api/src/trpc";
-import { createProxySSGHelpers } from "@trpc/react-query/ssg";
+
 import dayjs, { displayTime } from "~/utils/dayjs";
 import {
-  GetServerSideProps,
-  GetServerSidePropsContext,
   InferGetServerSidePropsType,
   NextPage,
 } from "next";
 import Link from "next/link";
 import { z } from "zod";
 import { api, RouterOutputs } from "~/utils/api";
-import { getServerSession } from "@acme/auth";
-import { transformer } from "@acme/api/transformer";
-import { DehydratedState } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { createSSR } from "~/utils/ssr";
 
 type TimeRecord = RouterOutputs["timeRecord"]["all"][number];
 
-export const getServerSideProps: GetServerSideProps<{
-  ano: number;
-  mes: number;
-  teamId: string;
-  trpcState: DehydratedState;
-}> = async (context: GetServerSidePropsContext) => {
-  const { ano: anoParam, mes: mesParam, time: teamParam } = context.query;
+export const getServerSideProps = createSSR(
+  z.object({
+    teamId: z.string().cuid(),
+    userId: z.string().cuid(),
+    year: z.coerce.number().min(2000),
+    month: z.coerce.number().min(1).max(12),
+  }),
+  z.void(),
+  async (ssr, { teamId, userId, year, month }) => {
+    const session = await ssr.auth.getSession.fetch();
 
-  const ano = z.coerce.number().min(2000).parse(anoParam);
-  const mes = z.coerce.number().min(1).max(12).parse(mesParam);
-  const teamId = z.coerce.string().cuid().parse(teamParam);
+    if (!session?.user) {
+      return {
+        result: "redirect",
+        destination: "/",
+      };
+    }
 
-  const { req, res } = context;
-  const session = await getServerSession({ req, res });
-  const ssg = createProxySSGHelpers({
-    router: appRouter,
-    ctx: createInnerTRPCContext({ session }),
-    transformer: transformer,
-  });
+    if (session.user.id !== userId) {
+      return {
+        result: "redirect",
+        destination: `/${teamId}`,
+      };
+    }
 
-  await ssg.auth.getSession.prefetch();
+    const date = dayjs()
+      .month(month - 1)
+      .year(year);
 
-  const date = dayjs()
-    .month(mes - 1)
-    .year(ano);
-
-  await ssg.timeRecord.all.prefetch({
-    start: date.startOf("month").toDate(),
-    end: date.endOf("month").toDate(),
-    teamId,
-  });
-
-  await ssg.team.get.prefetch(teamId);
-
-  return {
-    props: {
-      ano,
-      mes,
+    await ssr.timeRecord.all.prefetch({
+      start: date.startOf("month").toDate(),
+      end: date.endOf("month").toDate(),
       teamId,
-      trpcState: ssg.dehydrate(),
-    },
-  };
-};
+    });
+
+    await ssr.team.get.prefetch(teamId);
+  },
+);
 
 const Registros: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ ano, mes, teamId }) => {
+> = ({ teamId, userId, year, month }) => {
   const date = dayjs()
-    .month(mes - 1)
-    .year(ano);
+    .month(month - 1)
+    .year(year);
 
   const { data: timeRecord } = api.timeRecord.all.useQuery({
     start: date.startOf("month").toDate(),
@@ -98,7 +87,7 @@ const Registros: NextPage<
       <h2 className="flex text-2xl font-bold">
         <Link
           className="text-xl font-bold"
-          href={`/${teamId}/registros/${date
+          href={`/${teamId}/${userId}/${date
             .subtract(1, "month")
             .format("YYYY/M")}`}
         >
@@ -109,7 +98,7 @@ const Registros: NextPage<
         </div>
         <Link
           className="text-xl font-bold"
-          href={`/${teamId}/registros/${date.add(1, "month").format("YYYY/M")}`}
+          href={`/${teamId}/${userId}/${date.add(1, "month").format("YYYY/M")}`}
         >
           {">"}
         </Link>

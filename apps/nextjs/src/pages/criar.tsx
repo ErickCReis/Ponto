@@ -12,8 +12,8 @@ const CriarSchema = z.object({
 const Criar: NextPage = () => {
   const router = useRouter();
   const { mutate, isLoading } = api.team.create.useMutation({
-    onSuccess: async () => {
-      await router.push("/");
+    onSuccess: async (team) => {
+      await router.push(`/${team.id}`);
     },
   });
 

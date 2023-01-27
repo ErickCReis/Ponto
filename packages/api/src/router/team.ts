@@ -17,18 +17,19 @@ export const teamRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.string().cuid())
     .query(async ({ ctx, input }) => {
-      const team = await ctx.prisma.team.findUnique({
+      const team = await ctx.prisma.team.findFirst({
+        include: {
+          TeamMember: true,
+        },
         where: {
           id: input,
+          TeamMember: {
+            some: {
+              userId: ctx.session.user.id,
+            },
+          },
         },
       });
-
-      if (!team) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Time não encontrado",
-        });
-      }
 
       return team;
     }),

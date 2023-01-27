@@ -8,11 +8,8 @@ import { z } from "zod";
 
 export const Header = () => {
   const { query } = useRouter();
-  const teamId = z.coerce.string().cuid().optional().parse(query.time);
+  const teamId = z.string().cuid().optional().parse(query.teamId);
   const { data: session } = api.auth.getSession.useQuery();
-
-  const ano = dayjs().format("YYYY");
-  const mes = dayjs().format("M");
 
   return (
     <header className="flex w-full justify-between bg-zinc-800 p-4">
@@ -21,9 +18,13 @@ export const Header = () => {
           <Link href="/">Ponto</Link>
         </li>
         <div className="w-4" />
-        {teamId && (
+        {teamId && session?.user && (
           <li>
-            <Link href={`/${teamId}/registros/${ano}/${mes}`}>Registros</Link>
+            <Link
+              href={`/${teamId}/${session.user.id}/${dayjs().format("YYYY/M")}`}
+            >
+              Registros
+            </Link>
           </li>
         )}
       </ul>
