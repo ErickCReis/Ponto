@@ -58,8 +58,12 @@ const Home: NextPage = () => {
         </>
       )}
       <div className="h-6"></div>
-      <Link href="/criar" className={defaultStyle}>
+      <Link href="/team/new" className={defaultStyle}>
         Criar time
+      </Link>
+      <div className="h-6"></div>
+      <Link href="/team/join" className={defaultStyle}>
+        Juntar-se a um time
       </Link>
     </>
   );

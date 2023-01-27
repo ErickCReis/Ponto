@@ -5,11 +5,11 @@ import { Button } from "~/components/button";
 import { api } from "~/utils/api";
 import { MyForm } from "~/utils/form";
 
-const CriarSchema = z.object({
+const NewTeamSchema = z.object({
   name: z.string(),
 });
 
-const Criar: NextPage = () => {
+const NewTeam: NextPage = () => {
   const router = useRouter();
   const { mutate, isLoading } = api.team.create.useMutation({
     onSuccess: async (team) => {
@@ -17,7 +17,7 @@ const Criar: NextPage = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof CriarSchema>) => {
+  const onSubmit = (values: z.infer<typeof NewTeamSchema>) => {
     if (isLoading) return;
 
     mutate(values);
@@ -30,7 +30,7 @@ const Criar: NextPage = () => {
       <div className="h-6"></div>
 
       <MyForm
-        schema={CriarSchema}
+        schema={NewTeamSchema}
         onSubmit={onSubmit}
         renderAfter={() => (
           <div className="mt-3 flex justify-center">
@@ -47,4 +47,4 @@ const Criar: NextPage = () => {
   );
 };
 
-export default Criar;
+export default NewTeam;

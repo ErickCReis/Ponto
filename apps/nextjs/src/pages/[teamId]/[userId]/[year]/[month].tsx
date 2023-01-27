@@ -1,9 +1,5 @@
-
 import dayjs, { displayTime } from "~/utils/dayjs";
-import {
-  InferGetServerSidePropsType,
-  NextPage,
-} from "next";
+import { InferGetServerSidePropsType, NextPage } from "next";
 import Link from "next/link";
 import { z } from "zod";
 import { api, RouterOutputs } from "~/utils/api";
@@ -30,7 +26,20 @@ export const getServerSideProps = createSSR(
       };
     }
 
-    if (session.user.id !== userId) {
+    const team = await ssr.team.get.fetch(teamId);
+
+    if (!team) {
+      return {
+        result: "redirect",
+        destination: "/",
+      };
+    }
+
+    const teamMember = team.TeamMember.find(
+      (member) => member.userId === session.user.id,
+    );
+
+    if (session.user.id !== userId && teamMember?.role !== "ADMIN") {
       return {
         result: "redirect",
         destination: `/${teamId}`,
@@ -45,9 +54,8 @@ export const getServerSideProps = createSSR(
       start: date.startOf("month").toDate(),
       end: date.endOf("month").toDate(),
       teamId,
+      userId,
     });
-
-    await ssr.team.get.prefetch(teamId);
   },
 );
 
@@ -62,6 +70,7 @@ const Registros: NextPage<
     start: date.startOf("month").toDate(),
     end: date.endOf("month").toDate(),
     teamId,
+    userId,
   });
 
   const { data: team } = api.team.get.useQuery(teamId);

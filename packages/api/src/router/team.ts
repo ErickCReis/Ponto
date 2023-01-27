@@ -57,15 +57,11 @@ export const teamRouter = createTRPCRouter({
       return team;
     }),
   join: protectedProcedure
-    .input(
-      z.object({
-        teamId: z.string(),
-      }),
-    )
+    .input(z.string())
     .mutation(async ({ ctx, input }) => {
       const team = await ctx.prisma.team.findUnique({
         where: {
-          id: input.teamId,
+          id: input,
         },
       });
 
