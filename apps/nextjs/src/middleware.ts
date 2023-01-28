@@ -1,18 +1,16 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { connectEdge } from "@acme/db/utils/kysely";
+import { withAuth } from "next-auth/middleware";
 
-export async function middleware(request: NextRequest) {
-  if (request.nextUrl.pathname !== "/") {
-    return NextResponse.next();
-  }
+export default withAuth(
+  function middleware(_) {
+    console.log("middleware");
+  },
+  {
+    callbacks: {
+      authorized: ({ token }) => !!token,
+    },
+  },
+);
 
-  console.log("middleware");
-  const conn = connectEdge();
-
-  const users = await conn.selectFrom("User").selectAll().execute();
-
-  console.log(users);
-
-  return NextResponse.next();
-}
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};

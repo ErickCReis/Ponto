@@ -7,6 +7,9 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 export const authOptions: NextAuthOptions = {
   // Configure one or more authentication providers
   adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: "jwt",
+  },
   providers: [
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID as string,
@@ -15,11 +18,20 @@ export const authOptions: NextAuthOptions = {
     // ...add more providers here
   ],
   callbacks: {
-    session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
+    // session({ session, user }) {
+    //   if (session.user) {
+    //     session.user.id = user.id;
+    //   }
+    //   return session;
+    // },
+    jwt({ token, user }) {
+      if (user) {
+        token.user = {
+          ...token,
+          id: user.id,
+        };
       }
-      return session;
+      return token;
     },
   },
 };

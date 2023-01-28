@@ -13,11 +13,11 @@ export const timeRecordRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      if (ctx.session.user.id !== input.userId) {
+      if (ctx.token.user.id !== input.userId) {
         const teamMember = await ctx.prisma.teamMember.findFirst({
           where: {
             teamId: input.teamId,
-            userId: ctx.session.user.id,
+            userId: ctx.token.user.id,
           },
         });
 
@@ -31,7 +31,7 @@ export const timeRecordRouter = createTRPCRouter({
 
       return ctx.prisma.timeRecord.findMany({
         where: {
-          userId: input.userId ?? ctx.session.user.id,
+          userId: input.userId ?? ctx.token.user.id,
           createdAt: { gte: input?.start, lte: input?.end },
           teamId: input.teamId,
         },
@@ -46,7 +46,7 @@ export const timeRecordRouter = createTRPCRouter({
     .mutation(({ ctx, input }) => {
       return ctx.prisma.timeRecord.create({
         data: {
-          userId: ctx.session.user.id,
+          userId: ctx.token.user.id,
           teamId: input.teamId,
         },
       });

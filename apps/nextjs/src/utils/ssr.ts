@@ -1,17 +1,17 @@
 import { appRouter } from "@acme/api";
 import { createInnerTRPCContext } from "@acme/api/src/trpc";
 import { transformer } from "@acme/api/transformer";
-import { getServerSession, Session } from "@acme/auth";
+import { getServerToken, JWT } from "@acme/auth";
 import { DehydratedState } from "@tanstack/react-query";
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import { GetServerSideProps } from "next";
 import { ParsedUrlQuery } from "querystring";
 import { z } from "zod";
 
-const getContext = (session: Session | null) => {
+const getContext = (token: JWT | null) => {
   return createProxySSGHelpers({
     router: appRouter,
-    ctx: createInnerTRPCContext({ session }),
+    ctx: createInnerTRPCContext({ token }),
     transformer: transformer,
   });
 };
@@ -42,13 +42,13 @@ export const createSSR = <Q, R>(
     R & Q & { trpcState: DehydratedState },
     Q extends ParsedUrlQuery ? Q : ParsedUrlQuery
   > = async (context) => {
-    const { req, res, query } = context;
+    const { req, query } = context;
 
     const parsedQuery = queryScheme.parse(query);
 
-    const session = await getServerSession({ req, res });
+    const token = await getServerToken({ req });
 
-    const ssr = getContext(session);
+    const ssr = getContext(token);
 
     const callbackResult = await callback(ssr, parsedQuery);
 

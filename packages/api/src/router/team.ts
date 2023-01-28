@@ -1,4 +1,3 @@
-import { Team } from "@acme/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { protectedProcedure, createTRPCRouter } from "../trpc";
@@ -10,7 +9,7 @@ export const teamRouter = createTRPCRouter({
         team: true,
       },
       where: {
-        userId: ctx.session.user.id,
+        userId: ctx.token.user.id,
       },
     });
   }),
@@ -25,7 +24,7 @@ export const teamRouter = createTRPCRouter({
           id: input,
           TeamMember: {
             some: {
-              userId: ctx.session.user.id,
+              userId: ctx.token.user.id,
             },
           },
         },
@@ -49,7 +48,7 @@ export const teamRouter = createTRPCRouter({
       await ctx.prisma.teamMember.create({
         data: {
           teamId: team.id,
-          userId: ctx.session.user.id,
+          userId: ctx.token.user.id,
           role: "ADMIN",
         },
       });
@@ -74,7 +73,7 @@ export const teamRouter = createTRPCRouter({
 
       const teamMember = await ctx.prisma.teamMember.findMany({
         where: {
-          userId: ctx.session.user.id,
+          userId: ctx.token.user.id,
           teamId: team.id,
         },
       });
@@ -89,7 +88,7 @@ export const teamRouter = createTRPCRouter({
       await ctx.prisma.teamMember.create({
         data: {
           teamId: team.id,
-          userId: ctx.session.user.id,
+          userId: ctx.token.user.id,
           role: "MEMBER",
         },
       });

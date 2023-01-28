@@ -18,11 +18,17 @@
  */
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 
-import { getServerSession, type Session } from "@acme/auth";
+import {
+  // getServerSession,
+  // type Session,
+  getServerToken,
+  type JWT,
+} from "@acme/auth";
 import { prisma } from "@acme/db";
 
 type CreateContextOptions = {
-  session: Session | null;
+  // session: Session | null;
+  token: JWT | null;
 };
 
 /**
@@ -36,7 +42,8 @@ type CreateContextOptions = {
  */
 export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
-    session: opts.session,
+    // session: opts.session,
+    token: opts.token,
     prisma,
   };
 };
@@ -47,13 +54,16 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
  * @link https://trpc.io/docs/context
  */
 export const createTRPCContext = async (opts: CreateNextContextOptions) => {
-  const { req, res } = opts;
+  const { req } = opts;
 
   // Get the session from the server using the unstable_getServerSession wrapper function
-  const session = await getServerSession({ req, res });
+  // const session = await getServerSession({ req, res });
+
+  const token = await getServerToken({ req });
 
   return createInnerTRPCContext({
-    session,
+    // session,
+    token,
   });
 };
 
@@ -100,13 +110,23 @@ export const publicProcedure = t.procedure;
  * procedure
  */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
+  // if (!ctx.session || !ctx.session.user) {
+  //   throw new TRPCError({ code: "UNAUTHORIZED" });
+  // }
+  // return next({
+  //   ctx: {
+  //     // infers the `session` as non-nullable
+  //     session: { ...ctx.session, user: ctx.session.user },
+  //   },
+  // });
+
+  if (!ctx.token || !ctx.token.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({
     ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
+      // infers the `token` as non-nullable
+      token: { ...ctx.token, user: ctx.token.user },
     },
   });
 });
