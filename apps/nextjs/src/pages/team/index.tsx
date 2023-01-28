@@ -1,17 +1,16 @@
-import { Team } from ".prisma/client";
+import { Team as Teams } from ".prisma/client";
 import type { NextPage } from "next";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { z } from "zod";
-import { Button, defaultStyle } from "~/components/button";
+import { defaultStyle } from "~/components/button";
 import { api } from "~/utils/api";
 import { createSSR } from "~/utils/ssr";
 
-const CardTeam: React.FC<{ team: Team }> = ({ team }) => {
+const CardTeam: React.FC<{ team: Teams }> = ({ team }) => {
   return (
     <Link
       className="rounded-lg border-2 border-zinc-300 p-3 hover:bg-zinc-600"
-      href={`/${team.id}`}
+      href={`/team/${team.id}`}
     >
       {team.name}
     </Link>
@@ -19,22 +18,11 @@ const CardTeam: React.FC<{ team: Team }> = ({ team }) => {
 };
 
 export const getServerSideProps = createSSR(z.object({}), async (ssr, _) => {
-  await ssr.auth.getSession.prefetch();
   await ssr.team.all.prefetch();
 });
 
-const Home: NextPage = () => {
-  const { data: session } = api.auth.getSession.useQuery();
+const Teams: NextPage = () => {
   const { data: teams } = api.team.all.useQuery();
-
-  if (!session?.user) {
-    return (
-      <>
-        <div className="h-6"></div>{" "}
-        <Button onClick={() => void signIn()}>Entrar</Button>
-      </>
-    );
-  }
 
   return (
     <>
@@ -67,4 +55,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default Teams;

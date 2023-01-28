@@ -17,6 +17,9 @@ export const authOptions: NextAuthOptions = {
     }),
     // ...add more providers here
   ],
+  pages: {
+    signIn: "/sign-in",
+  },
   callbacks: {
     // session({ session, user }) {
     //   if (session.user) {
@@ -32,6 +35,9 @@ export const authOptions: NextAuthOptions = {
         };
       }
       return token;
+    },
+    async redirect(_) {
+      return "/team";
     },
   },
 };

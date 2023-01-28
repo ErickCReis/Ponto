@@ -11,39 +11,11 @@ type TimeRecord = RouterOutputs["timeRecord"]["all"][number];
 export const getServerSideProps = createSSR(
   z.object({
     teamId: z.string().cuid(),
-    userId: z.string().cuid(),
     year: z.coerce.number().min(2000),
     month: z.coerce.number().min(1).max(12),
   }),
-  async (ssr, { teamId, userId, year, month }) => {
-    const session = await ssr.auth.getSession.fetch();
-
-    if (!session?.user) {
-      return {
-        result: "redirect",
-        destination: "/",
-      };
-    }
-
-    const team = await ssr.team.get.fetch(teamId);
-
-    if (!team) {
-      return {
-        result: "redirect",
-        destination: "/",
-      };
-    }
-
-    const teamMember = team.TeamMember.find(
-      (member) => member.userId === session.user.id,
-    );
-
-    if (session.user.id !== userId && teamMember?.role !== "ADMIN") {
-      return {
-        result: "redirect",
-        destination: `/${teamId}`,
-      };
-    }
+  async (ssr, { teamId, year, month }) => {
+    await ssr.team.get.prefetch(teamId);
 
     const date = dayjs()
       .month(month - 1)
@@ -53,14 +25,13 @@ export const getServerSideProps = createSSR(
       start: date.startOf("month").toDate(),
       end: date.endOf("month").toDate(),
       teamId,
-      userId,
     });
   },
 );
 
 const Registros: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ teamId, userId, year, month }) => {
+> = ({ teamId, year, month }) => {
   const date = dayjs()
     .month(month - 1)
     .year(year);
@@ -69,7 +40,6 @@ const Registros: NextPage<
     start: date.startOf("month").toDate(),
     end: date.endOf("month").toDate(),
     teamId,
-    userId,
   });
 
   const { data: team } = api.team.get.useQuery(teamId);
@@ -95,9 +65,7 @@ const Registros: NextPage<
       <h2 className="flex text-2xl font-bold">
         <Link
           className="text-xl font-bold"
-          href={`/${teamId}/${userId}/${date
-            .subtract(1, "month")
-            .format("YYYY/M")}`}
+          href={`/team/${teamId}/${date.subtract(1, "month").format("YYYY/M")}`}
         >
           {"<"}
         </Link>
@@ -106,7 +74,7 @@ const Registros: NextPage<
         </div>
         <Link
           className="text-xl font-bold"
-          href={`/${teamId}/${userId}/${date.add(1, "month").format("YYYY/M")}`}
+          href={`/team/${teamId}/${date.add(1, "month").format("YYYY/M")}`}
         >
           {">"}
         </Link>

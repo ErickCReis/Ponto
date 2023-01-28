@@ -95,4 +95,45 @@ export const teamRouter = createTRPCRouter({
 
       return team;
     }),
+  members: protectedProcedure
+    .input(z.string())
+    .query(async ({ ctx, input }) => {
+      const team = await ctx.prisma.team.findUnique({
+        where: {
+          id: input,
+        },
+      });
+
+      if (!team) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Time não encontrado",
+        });
+      }
+
+      const teamMember = await ctx.prisma.teamMember.findMany({
+        where: {
+          userId: ctx.token.user.id,
+          teamId: team.id,
+        },
+      });
+
+      if (!!teamMember[0] && teamMember[0].role !== "ADMIN") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Você não tem permissão para ver os membros",
+        });
+      }
+
+      const teamMembers = await ctx.prisma.teamMember.findMany({
+        include: {
+          user: true,
+        },
+        where: {
+          teamId: input,
+        },
+      });
+
+      return teamMembers;
+    }),
 });

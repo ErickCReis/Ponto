@@ -13,7 +13,7 @@ const NewTeam: NextPage = () => {
   const router = useRouter();
   const { mutate, isLoading } = api.team.create.useMutation({
     onSuccess: async (team) => {
-      await router.push(`/${team.id}`);
+      await router.push(`/team/${team.id}/admin`);
     },
   });
 

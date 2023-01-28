@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import type { InferGetServerSidePropsType, NextPage } from "next";
-import { signIn } from "next-auth/react";
 import dayjs, { displayTime } from "~/utils/dayjs";
 import { api } from "~/utils/api";
 import { Button } from "~/components/button";
@@ -93,23 +92,7 @@ export const getServerSideProps = createSSR(
     teamId: z.coerce.string().cuid(),
   }),
   async (ssr, { teamId }) => {
-    const session = await ssr.auth.getSession.fetch();
-
-    if (!session?.user) {
-      return {
-        result: "redirect",
-        destination: "/",
-      };
-    }
-
-    const team = await ssr.team.get.fetch(teamId);
-
-    if (!team) {
-      return {
-        result: "redirect",
-        destination: "/",
-      };
-    }
+    await ssr.team.get.prefetch(teamId);
 
     await ssr.timeRecord.all.prefetch({
       start: dayjs().startOf("day").toDate(),
@@ -126,10 +109,9 @@ export const getServerSideProps = createSSR(
   },
 );
 
-const Time: NextPage<
+const Team: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ clock, teamId }) => {
-  const { data: session } = api.auth.getSession.useQuery();
   const { data: team } = api.team.get.useQuery(teamId);
 
   return (
@@ -139,18 +121,15 @@ const Time: NextPage<
         {team?.name || "Carregando..."}
       </h1>
       <div className="h-6"></div>
+
       <Clock initialTime={clock} />
+
       <div className="h-6"></div>
-      {session?.user ? (
-        <>
-          <MarkTimeButton teamId={teamId} />
-          <RegisteredTimes teamId={teamId} />
-        </>
-      ) : (
-        <Button onClick={() => void signIn()}>Entrar</Button>
-      )}
+
+      <MarkTimeButton teamId={teamId} />
+      <RegisteredTimes teamId={teamId} />
     </>
   );
 };
 
-export default Time;
+export default Team;

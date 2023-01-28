@@ -7,9 +7,11 @@ import { useRouter } from "next/router";
 import { z } from "zod";
 
 export const Header = () => {
-  const { query } = useRouter();
+  const { query, pathname } = useRouter();
   const teamId = z.string().cuid().optional().parse(query.teamId);
   const { data: session } = api.auth.getSession.useQuery();
+
+  const isAdminPath = pathname.includes("/admin");
 
   return (
     <header className="flex w-full justify-between bg-zinc-800 p-4">
@@ -18,11 +20,9 @@ export const Header = () => {
           <Link href="/">Ponto</Link>
         </li>
         <div className="w-4" />
-        {teamId && session?.user && (
+        {teamId && session?.user && !isAdminPath && (
           <li>
-            <Link
-              href={`/${teamId}/${session.user.id}/${dayjs().format("YYYY/M")}`}
-            >
+            <Link href={`/team/${teamId}/${dayjs().format("YYYY/M")}`}>
               Registros
             </Link>
           </li>

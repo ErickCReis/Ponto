@@ -201,6 +201,7 @@ importers:
 
   packages/db:
     specifiers:
+      '@planetscale/database': ^1.5.0
       '@prisma/client': ^4.8.0
       dotenv-cli: ^6.0.0
       kysely: ^0.23.4
@@ -208,9 +209,10 @@ importers:
       prisma: ^4.8.0
       typescript: ^4.9.4
     dependencies:
+      '@planetscale/database': 1.5.0
       '@prisma/client': 4.8.1_prisma@4.8.1
       kysely: 0.23.4
-      kysely-planetscale: 1.2.1_kysely@0.23.4
+      kysely-planetscale: 1.2.1_3b4ga6arylazwmj6lzyyulo5vq
     devDependencies:
       dotenv-cli: 6.0.0
       prisma: 4.8.1
@@ -2209,6 +2211,11 @@ packages:
       tiny-glob: 0.2.9
       tslib: 2.4.1
     dev: true
+
+  /@planetscale/database/1.5.0:
+    resolution: {integrity: sha512-Qwh7Or1W5dB5mZ9EQqDkgvkDKhBBmQe58KIVUy0SGocNtr5fP4JAWtvZ6EdLAV6C6hVpzNlCA2xIg9lKTswm1Q==}
+    engines: {node: '>=16'}
+    dev: false
 
   /@prisma/client/4.8.1_prisma@4.8.1:
     resolution: {integrity: sha512-d4xhZhETmeXK/yZ7K0KcVOzEfI5YKGGEr4F5SBV04/MU4ncN/HcE28sy3e4Yt8UFW0ZuImKFQJE+9rWt9WbGSQ==}
@@ -6103,12 +6110,13 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
-  /kysely-planetscale/1.2.1_kysely@0.23.4:
+  /kysely-planetscale/1.2.1_3b4ga6arylazwmj6lzyyulo5vq:
     resolution: {integrity: sha512-tPgyTSSkU0dwFbwSnWITU4VcuuQfsBA+HfGMYPFcUDBIjMDrzWE4Lbky7ue1NqqF58GyYPn9kOm2e61T9BVwww==}
     peerDependencies:
       '@planetscale/database': '*'
       kysely: '*'
     dependencies:
+      '@planetscale/database': 1.5.0
       date-fns: 2.29.3
       kysely: 0.23.4
     dev: false

@@ -12,6 +12,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@planetscale/database": "^1.5.0",
     "@prisma/client": "^4.8.0",
     "kysely": "^0.23.4",
     "kysely-planetscale": "^1.2.1"
