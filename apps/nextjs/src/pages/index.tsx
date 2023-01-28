@@ -43,7 +43,9 @@ const Home: NextPage = () => {
   return (
     <>
       {!teams?.length ? (
-        <div>Você não tem nenhum time</div>
+        <div className="mt-6 text-center text-xl font-bold">
+          Você não tem nenhum time
+        </div>
       ) : (
         <>
           <div className="h-6"></div>
