@@ -33,7 +33,6 @@ type RedirectType = {
 
 export const createSSR = <Q, R>(
   queryScheme: z.Schema<Q>,
-  propsScheme: z.Schema<R>,
   callback: <SSRContext extends ReturnType<typeof getContext>>(
     ssrContext: SSRContext,
     query: Q,
@@ -69,11 +68,10 @@ export const createSSR = <Q, R>(
     }
 
     if (callbackResult?.result === "success") {
-      const parsedProps = propsScheme.parse(callbackResult.data);
       return {
         props: {
           ...parsedQuery,
-          ...parsedProps,
+          ...callbackResult.data,
           trpcState: ssr.dehydrate(),
         },
       };

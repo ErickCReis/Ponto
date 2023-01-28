@@ -15,7 +15,6 @@ export const getServerSideProps = createSSR(
     year: z.coerce.number().min(2000),
     month: z.coerce.number().min(1).max(12),
   }),
-  z.void(),
   async (ssr, { teamId, userId, year, month }) => {
     const session = await ssr.auth.getSession.fetch();
 

@@ -18,14 +18,10 @@ const CardTeam: React.FC<{ team: Team }> = ({ team }) => {
   );
 };
 
-export const getServerSideProps = createSSR(
-  z.object({}),
-  z.void(),
-  async (ssr, _) => {
-    await ssr.auth.getSession.prefetch();
-    await ssr.team.all.prefetch();
-  },
-);
+export const getServerSideProps = createSSR(z.object({}), async (ssr, _) => {
+  await ssr.auth.getSession.prefetch();
+  await ssr.team.all.prefetch();
+});
 
 const Home: NextPage = () => {
   const { data: session } = api.auth.getSession.useQuery();

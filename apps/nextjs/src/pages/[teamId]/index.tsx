@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import type {
-  InferGetServerSidePropsType,
-  NextPage,
-} from "next";
+import type { InferGetServerSidePropsType, NextPage } from "next";
 import { signIn } from "next-auth/react";
 import dayjs, { displayTime } from "~/utils/dayjs";
 import { api } from "~/utils/api";
@@ -94,9 +91,6 @@ const RegisteredTimes = ({ teamId }: { teamId: string }) => {
 export const getServerSideProps = createSSR(
   z.object({
     teamId: z.coerce.string().cuid(),
-  }),
-  z.object({
-    clock: z.string(),
   }),
   async (ssr, { teamId }) => {
     const session = await ssr.auth.getSession.fetch();
