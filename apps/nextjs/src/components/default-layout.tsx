@@ -8,6 +8,7 @@ export const DefaultLayout: React.FC<{
     <>
       <Head>
         <title>Ponto</title>
+        <meta name="description" content="Controle de ponto" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex h-screen flex-col items-center bg-zinc-700 text-white">

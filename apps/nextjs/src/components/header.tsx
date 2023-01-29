@@ -15,11 +15,10 @@ export const Header = () => {
 
   return (
     <header className="flex w-full justify-between bg-zinc-800 p-4">
-      <ul className="flex items-end">
+      <ul className="flex items-end gap-4">
         <li className="text-4xl font-bold">
           <Link href="/">Ponto</Link>
         </li>
-        <div className="w-4" />
         {teamId && session?.user && !isAdminPath && (
           <li>
             <Link href={`/team/${teamId}/${dayjs().format("YYYY/M")}`}>
