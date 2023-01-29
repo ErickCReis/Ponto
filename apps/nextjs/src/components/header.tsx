@@ -31,7 +31,9 @@ export const Header = () => {
         <div className="flex items-center">
           <Link href="/perfil">{session.user.name}</Link>
           <div className="w-2" />
-          <Button onClick={() => void signOut()}>Sair</Button>
+          <Button onClick={() => void signOut()} className="py-2 px-4">
+            Sair
+          </Button>
         </div>
       )}
     </header>

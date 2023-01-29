@@ -1,6 +1,6 @@
 import clsx from "clsx";
 
-export const defaultStyle = clsx([
+export const defaultStyle = [
   "rounded-lg",
   "bg-white/10",
   "px-6",
@@ -10,13 +10,17 @@ export const defaultStyle = clsx([
   "no-underline",
   "transition",
   "hover:bg-white/20",
-]);
+];
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
-export const Button: React.FC<ButtonProps> = ({ children, onClick }) => {
+export const Button: React.FC<ButtonProps> = ({
+  children,
+  className,
+  ...props
+}) => {
   return (
-    <button className={defaultStyle} onClick={onClick}>
+    <button className={clsx(...defaultStyle, className)} {...props}>
       {children}
     </button>
   );

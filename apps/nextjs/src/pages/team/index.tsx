@@ -1,4 +1,5 @@
 import { Team as Teams } from ".prisma/client";
+import clsx from "clsx";
 import type { NextPage } from "next";
 import Link from "next/link";
 import { z } from "zod";
@@ -44,11 +45,11 @@ const Teams: NextPage = () => {
         </>
       )}
       <div className="h-6"></div>
-      <Link href="/team/new" className={defaultStyle}>
+      <Link href="/team/new" className={clsx(defaultStyle)}>
         Criar time
       </Link>
       <div className="h-6"></div>
-      <Link href="/team/join" className={defaultStyle}>
+      <Link href="/team/join" className={clsx(defaultStyle)}>
         Juntar-se a um time
       </Link>
     </>
