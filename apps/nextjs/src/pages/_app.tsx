@@ -3,6 +3,7 @@ import "../styles/globals.css";
 import { SessionProvider } from "next-auth/react";
 import type { Session } from "next-auth";
 import type { AppType } from "next/app";
+import { Analytics } from "@vercel/analytics/react";
 
 import { DefaultLayout } from "~/components/default-layout";
 import { api } from "~/utils/api";
@@ -14,11 +15,14 @@ const MyApp: AppType<{ session: Session | null }> = ({
   pageProps: { session, ...pageProps },
 }) => {
   return (
-    <DefaultLayout>
-      <SessionProvider session={session}>
-        <Component {...pageProps} />
-      </SessionProvider>
-    </DefaultLayout>
+    <>
+      <DefaultLayout>
+        <SessionProvider session={session}>
+          <Component {...pageProps} />
+        </SessionProvider>
+      </DefaultLayout>
+      <Analytics />
+    </>
   );
 };
 

@@ -100,6 +100,7 @@ importers:
       '@types/node': ^18.0.0
       '@types/react': ^18.0.25
       '@types/react-dom': ^18.0.9
+      '@vercel/analytics': ^0.1.8
       autoprefixer: ^10.4.13
       clsx: ^1.2.1
       dayjs: ^1.11.7
@@ -127,6 +128,7 @@ importers:
       '@trpc/react-query': 10.8.1_krdvppocpp5g6rpv2pnlhwexoi
       '@trpc/server': 10.8.1
       '@ts-react/form': 1.1.3_bfpnyh5om24rz447mtd4p4zo4m
+      '@vercel/analytics': 0.1.8_react@18.2.0
       clsx: 1.2.1
       dayjs: 1.11.7
       next: 13.1.1_biqbaboplfbrettd7655fr4n2y
@@ -2888,6 +2890,14 @@ packages:
       '@urql/core': 2.3.6_graphql@15.8.0
       graphql: 15.8.0
       wonka: 4.0.15
+    dev: false
+
+  /@vercel/analytics/0.1.8_react@18.2.0:
+    resolution: {integrity: sha512-PQrOI8BJ9qUiVJuQfnKiJd15eDjDJH9TBKsNeMrtelT4NAk7d9mBVz1CoZkvoFnHQ0OW7Xnqmr1F2nScfAnznQ==}
+    peerDependencies:
+      react: ^16.8||^17||^18
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /@xmldom/xmldom/0.7.9:
