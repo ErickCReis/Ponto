@@ -30,10 +30,19 @@ export const timeRecordRouter = createTRPCRouter({
       }
 
       return ctx.prisma.timeRecord.findMany({
+        select: {
+          id: true,
+          teamId: true,
+          userId: true,
+          time: true,
+        },
         where: {
           userId: input.userId ?? ctx.token.user.id,
-          createdAt: { gte: input?.start, lte: input?.end },
+          time: { gte: input?.start, lte: input?.end },
           teamId: input.teamId,
+        },
+        orderBy: {
+          time: "asc",
         },
       });
     }),
@@ -41,6 +50,7 @@ export const timeRecordRouter = createTRPCRouter({
     .input(
       z.object({
         teamId: z.string(),
+        time: z.date().optional(),
       }),
     )
     .mutation(({ ctx, input }) => {
@@ -48,6 +58,16 @@ export const timeRecordRouter = createTRPCRouter({
         data: {
           userId: ctx.token.user.id,
           teamId: input.teamId,
+          time: input.time,
+        },
+      });
+    }),
+  delete: protectedProcedure
+    .input(z.string().cuid())
+    .mutation(({ ctx, input }) => {
+      return ctx.prisma.timeRecord.delete({
+        where: {
+          id: input,
         },
       });
     }),

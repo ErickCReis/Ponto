@@ -1,7 +1,9 @@
 import { useTsController } from "@ts-react/form";
 import clsx from "clsx";
 
-export const TextField = ({ className }: { className: string }) => {
+type TextFieldProps = React.InputHTMLAttributes<HTMLInputElement>;
+
+export const TextField = ({ className }: TextFieldProps) => {
   const { field, error } = useTsController<string>();
   return (
     <div className="flex flex-col">
