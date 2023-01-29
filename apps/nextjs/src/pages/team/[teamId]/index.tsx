@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import type { InferGetServerSidePropsType, NextPage } from "next";
 import dayjs, { displayTime } from "~/utils/dayjs";
 import { api } from "~/utils/api";
@@ -6,6 +5,7 @@ import { Button } from "~/components/button";
 import { z } from "zod";
 import { useClock } from "~/hooks/use-clock";
 import { createSSR } from "~/utils/ssr";
+import { useConfirmClick } from "~/hooks/use-confirm-click";
 
 const Clock = ({ initialTime }: { initialTime?: string }) => {
   const time = useClock({ initialTime });
@@ -21,17 +21,12 @@ const MarkTimeButton = ({ teamId }: { teamId: string }) => {
     },
   });
 
-  const [isConfirm, setIsConfirm] = useState(false);
-
-  useEffect(() => {
-    if (!isConfirm) {
-      return;
-    }
-    const timeout = setTimeout(() => {
-      setIsConfirm(false);
-    }, 3000);
-    return () => clearTimeout(timeout);
-  }, [isConfirm]);
+  const { handleClick, textToShow } = useConfirmClick({
+    text: "Marcar ponto",
+    onConfirm: () => {
+      markTime({ teamId });
+    },
+  });
 
   return (
     <>
@@ -39,20 +34,10 @@ const MarkTimeButton = ({ teamId }: { teamId: string }) => {
         onClick={() => {
           if (isLoading) return;
 
-          if (!isConfirm) {
-            setIsConfirm(true);
-            return;
-          }
-
-          markTime({ teamId });
-          setIsConfirm(false);
+          handleClick();
         }}
       >
-        {isLoading
-          ? "Salvando"
-          : isConfirm
-          ? "Clique para confirmar"
-          : "Marcar ponto"}
+        {isLoading ? "Salvando" : textToShow}
       </Button>
     </>
   );

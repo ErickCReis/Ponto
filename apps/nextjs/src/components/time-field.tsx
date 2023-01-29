@@ -14,25 +14,19 @@ export const TimeField = ({ className, min, max }: TimeFieldProps) => {
   const { field, error } = useTsController<Date>();
 
   return (
-    <div className="flex">
-      <input
-        type="datetime-local"
-        className={clsx(
-          className,
-          "rounded-sm border-zinc-400 bg-zinc-400 p-2 placeholder:text-zinc-200",
-          error && "border-red-500",
-        )}
-        value={
-          field.value ? dayjs(field.value).format("YYYY-MM-DD[T]HH:mm") : ""
-        }
-        onChange={(e) => {
-          field.onChange(dayjs(e.target.value).toDate());
-        }}
-        min={min ? min.format("YYYY-MM-DD[T]HH:mm") : undefined}
-        max={max ? max.format("YYYY-MM-DD[T]HH:mm") : undefined}
-      />
-      <div className="w-2"></div>
-      <button>Adicionar</button>
-    </div>
+    <input
+      type="datetime-local"
+      className={clsx(
+        className,
+        "rounded-sm border-zinc-400 bg-zinc-400 p-2 placeholder:text-zinc-200",
+        error && "border-red-500",
+      )}
+      value={field.value ? dayjs(field.value).format("YYYY-MM-DD[T]HH:mm") : ""}
+      onChange={(e) => {
+        field.onChange(dayjs(e.target.value).toDate());
+      }}
+      min={min ? min.format("YYYY-MM-DD[T]HH:mm") : undefined}
+      max={max ? max.format("YYYY-MM-DD[T]HH:mm") : undefined}
+    />
   );
 };

@@ -3,10 +3,11 @@ import { InferGetServerSidePropsType, NextPage } from "next";
 import Link from "next/link";
 import { z } from "zod";
 import { api, RouterOutputs } from "~/utils/api";
-import { useEffect, useMemo, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { createSSR } from "~/utils/ssr";
 import clsx from "clsx";
-import { MyForm } from "~/utils/form";
+import { createMyForm } from "~/utils/form";
+import { useConfirmClick } from "~/hooks/use-confirm-click";
 
 type TimeRecord = RouterOutputs["timeRecord"]["all"][number];
 
@@ -18,27 +19,16 @@ const TimeCell: React.FC<{ timeRecord: TimeRecord; isEditing: boolean }> = ({
   const { mutate: deleteTime } = api.timeRecord.delete.useMutation({
     onSuccess: async () => {
       await utils.timeRecord.all.refetch();
-      setShowDelete(false);
     },
   });
 
-  const [showDelete, setShowDelete] = useState(false);
-
-  useEffect(() => {
-    if (!showDelete) {
-      return;
-    }
-    const timeout = setTimeout(() => {
-      setShowDelete(false);
-    }, 3000);
-    return () => clearTimeout(timeout);
-  }, [showDelete]);
-
-  useEffect(() => {
-    if (!isEditing) {
-      setShowDelete(false);
-    }
-  }, [isEditing]);
+  const { handleClick, textToShow, isConfirm } = useConfirmClick({
+    text: displayTime({ date: timeRecord.time }),
+    confirmText: "Apagar",
+    onConfirm: () => {
+      deleteTime(timeRecord.id);
+    },
+  });
 
   return (
     <>
@@ -46,18 +36,11 @@ const TimeCell: React.FC<{ timeRecord: TimeRecord; isEditing: boolean }> = ({
         <button
           className={clsx(
             "text-lg hover:text-red-500",
-            showDelete && "text-red-500",
+            isConfirm && "text-red-500",
           )}
-          onClick={() => {
-            if (!showDelete) {
-              setShowDelete(true);
-              return;
-            }
-
-            deleteTime(timeRecord.id);
-          }}
+          onClick={handleClick}
         >
-          {showDelete ? "Apagar" : displayTime({ date: timeRecord.time })}
+          {textToShow}
         </button>
       ) : (
         <div className="text-lg">{displayTime({ date: timeRecord.time })}</div>
@@ -103,36 +86,51 @@ const AddTimeSchema = z.object({
   time: z.date(),
 });
 
+const AddTimeForm = ({
+  children,
+  onSubmit,
+}: {
+  children: ReactNode;
+  onSubmit: () => void;
+}) => {
+  const { handleClick, textToShow } = useConfirmClick({
+    text: "Adicionar",
+    onConfirm: onSubmit,
+  });
+
+  return (
+    <form className="flex gap-4">
+      {children}
+      <button
+        type="submit"
+        onClick={(e) => {
+          e.preventDefault();
+          handleClick();
+        }}
+      >
+        {textToShow}
+      </button>
+    </form>
+  );
+};
+
 const AddTime: React.FC<{ teamId: string; date: Dayjs }> = ({
   teamId,
   date,
 }) => {
   const utils = api.useContext();
 
-  const [isConfirm, setIsConfirm] = useState(false);
-
   const { mutate: markTime } = api.timeRecord.create.useMutation({
     async onSuccess() {
       await utils.timeRecord.all.refetch();
-      setIsConfirm(false);
     },
   });
 
   const onSubmit = (values: z.infer<typeof AddTimeSchema>) => {
-    console.log(values);
-
     markTime({ teamId, time: values.time });
   };
 
-  useEffect(() => {
-    if (!isConfirm) {
-      return;
-    }
-    const timeout = setTimeout(() => {
-      setIsConfirm(false);
-    }, 3000);
-    return () => clearTimeout(timeout);
-  }, [isConfirm]);
+  const MyForm = createMyForm(AddTimeForm);
 
   return (
     <MyForm
