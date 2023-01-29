@@ -8,6 +8,7 @@ export const getServerSideProps = createSSR(
     teamId: z.coerce.string().cuid(),
   }),
   async (ssr, { teamId }) => {
+    await ssr.team.get.prefetch(teamId);
     await ssr.team.members.prefetch(teamId);
   },
 );
