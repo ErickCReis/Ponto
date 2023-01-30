@@ -31,8 +31,6 @@ export const useConfirmClick = ({
   }, [isConfirm, text, confirmText]);
 
   const handleClick = () => {
-    console.log("isConfirm", isConfirm);
-
     if (isConfirm) {
       onConfirm();
     } else {

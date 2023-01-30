@@ -5,8 +5,6 @@ import { connectEdge } from "@acme/db/utils/kysely";
 
 export default withAuth(
   async function middleware({ nextUrl, nextauth, url }) {
-    console.log("MIDDLEWARE", nextUrl.pathname);
-
     if (!nextauth.token) {
       return NextResponse.redirect(new URL("/", url));
     }
