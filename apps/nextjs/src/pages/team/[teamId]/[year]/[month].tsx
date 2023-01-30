@@ -3,7 +3,7 @@ import { InferGetServerSidePropsType, NextPage } from "next";
 import Link from "next/link";
 import { z } from "zod";
 import { api, RouterOutputs } from "~/utils/api";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useMemo } from "react";
 import { createSSR } from "~/utils/ssr";
 import clsx from "clsx";
 import { createMyForm } from "~/utils/form";
@@ -11,10 +11,7 @@ import { useConfirmClick } from "~/hooks/use-confirm-click";
 
 type TimeRecord = RouterOutputs["timeRecord"]["all"][number];
 
-const TimeCell: React.FC<{ timeRecord: TimeRecord; isEditing: boolean }> = ({
-  timeRecord,
-  isEditing,
-}) => {
+const TimeCell: React.FC<{ timeRecord: TimeRecord }> = ({ timeRecord }) => {
   const utils = api.useContext();
   const { mutate: deleteTime } = api.timeRecord.delete.useMutation({
     onSuccess: async () => {
@@ -32,19 +29,15 @@ const TimeCell: React.FC<{ timeRecord: TimeRecord; isEditing: boolean }> = ({
 
   return (
     <>
-      {isEditing ? (
-        <button
-          className={clsx(
-            "text-lg hover:text-red-500",
-            isConfirm && "text-red-500",
-          )}
-          onClick={handleClick}
-        >
-          {textToShow}
-        </button>
-      ) : (
-        <div className="text-lg">{displayTime({ date: timeRecord.time })}</div>
-      )}
+      <button
+        className={clsx(
+          "text-lg hover:text-red-500",
+          isConfirm && "text-red-500",
+        )}
+        onClick={handleClick}
+      >
+        {textToShow}
+      </button>
     </>
   );
 };
@@ -53,31 +46,15 @@ const DayRow: React.FC<{
   day: string;
   timeRecords: TimeRecord[];
 }> = ({ day, timeRecords }) => {
-  const [isEditing, setIsEditing] = useState(false);
-
   return (
     <div className="flex items-center py-1">
       <h3 className="text-2xl font-bold">{day.padStart(2, "0")}</h3>
       <div className="w-6"></div>
       <div className="flex gap-3">
         {timeRecords.map((timeRecord) => (
-          <TimeCell
-            key={timeRecord.id}
-            timeRecord={timeRecord}
-            isEditing={isEditing}
-          />
+          <TimeCell key={timeRecord.id} timeRecord={timeRecord} />
         ))}
       </div>
-      <div className="w-6"></div>
-      <button
-        onClick={() => setIsEditing(!isEditing)}
-        className={clsx(
-          "text-sm",
-          isEditing && "rounded-sm  bg-white px-1 text-zinc-900",
-        )}
-      >
-        Editar
-      </button>
     </div>
   );
 };
@@ -93,7 +70,7 @@ const AddTimeForm = ({
   children: ReactNode;
   onSubmit: () => void;
 }) => {
-  const { handleClick, textToShow } = useConfirmClick({
+  const { handleClick, textToShow, isConfirm } = useConfirmClick({
     text: "Adicionar",
     onConfirm: onSubmit,
   });
@@ -103,6 +80,7 @@ const AddTimeForm = ({
       {children}
       <button
         type="submit"
+        className={clsx("hover:text-green-500", isConfirm && "text-green-500")}
         onClick={(e) => {
           e.preventDefault();
           handleClick();
