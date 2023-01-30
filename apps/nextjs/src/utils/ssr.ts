@@ -1,12 +1,12 @@
+import { ParsedUrlQuery } from "querystring";
+import { GetServerSideProps } from "next";
+import { DehydratedState } from "@tanstack/react-query";
+import { createProxySSGHelpers } from "@trpc/react-query/ssg";
+import { z } from "zod";
 import { appRouter } from "@acme/api";
 import { createInnerTRPCContext } from "@acme/api/src/trpc";
 import { transformer } from "@acme/api/transformer";
-import { getServerToken, JWT } from "@acme/auth";
-import { DehydratedState } from "@tanstack/react-query";
-import { createProxySSGHelpers } from "@trpc/react-query/ssg";
-import { GetServerSideProps } from "next";
-import { ParsedUrlQuery } from "querystring";
-import { z } from "zod";
+import { JWT, getServerToken } from "@acme/auth";
 
 const getContext = (token: JWT | null) => {
   return createProxySSGHelpers({

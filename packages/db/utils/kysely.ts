@@ -1,4 +1,4 @@
-import { User, Team, TeamMember } from "@prisma/client";
+import { Team, TeamMember, User } from "@prisma/client";
 import { Kysely } from "kysely";
 import { PlanetScaleDialect } from "kysely-planetscale";
 

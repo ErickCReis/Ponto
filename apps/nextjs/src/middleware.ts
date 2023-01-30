@@ -1,7 +1,7 @@
-import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import { connectEdge } from "@acme/db/utils/kysely";
+import { withAuth } from "next-auth/middleware";
 import { z } from "zod";
+import { connectEdge } from "@acme/db/utils/kysely";
 
 export default withAuth(
   async function middleware({ nextUrl, nextauth, url }) {

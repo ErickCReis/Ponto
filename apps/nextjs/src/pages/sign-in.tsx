@@ -3,7 +3,8 @@ import type {
   InferGetServerSidePropsType,
   NextPage,
 } from "next";
-import { signIn, getProviders } from "next-auth/react";
+import { getProviders, signIn } from "next-auth/react";
+
 import { Button } from "~/components/button";
 
 export const getServerSideProps: GetServerSideProps<{

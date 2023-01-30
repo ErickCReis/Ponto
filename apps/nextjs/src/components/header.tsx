@@ -1,10 +1,11 @@
-import { signOut } from "next-auth/react";
-import { api } from "~/utils/api";
-import { Button } from "./button";
 import Link from "next/link";
-import dayjs from "~/utils/dayjs";
 import { useRouter } from "next/router";
+import { signOut } from "next-auth/react";
 import { z } from "zod";
+
+import { api } from "~/utils/api";
+import dayjs from "~/utils/dayjs";
+import { Button } from "./button";
 
 export const Header = () => {
   const { query, pathname } = useRouter();

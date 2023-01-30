@@ -1,4 +1,5 @@
 import Head from "next/head";
+
 import { Header } from "./header";
 
 export const DefaultLayout: React.FC<{

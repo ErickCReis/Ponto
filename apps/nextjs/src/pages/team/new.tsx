@@ -1,9 +1,10 @@
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { z } from "zod";
-import { Button } from "~/components/button";
+
 import { api } from "~/utils/api";
 import { MyForm } from "~/utils/form";
+import { Button } from "~/components/button";
 
 const NewTeamSchema = z.object({
   name: z.string(),

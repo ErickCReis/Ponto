@@ -6,7 +6,7 @@
     "build": "pnpm with-env next build",
     "clean": "rm -rf .next .turbo node_modules",
     "dev": "pnpm with-env next dev",
-    "lint": "SKIP_ENV_VALIDATION=1 next lint",
+    "lint": "SKIP_ENV_VALIDATION=1 next lint --fix",
     "type-check": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env --"
   },

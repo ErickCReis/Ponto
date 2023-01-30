@@ -1,8 +1,8 @@
-import lib, { ConfigType, OptionType, Dayjs } from "dayjs";
+import lib, { ConfigType, Dayjs, OptionType } from "dayjs";
 import ptbr from "dayjs/locale/pt-br";
+import minMax from "dayjs/plugin/minMax";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import minMax from "dayjs/plugin/minMax";
 
 lib.locale(ptbr);
 lib.extend(utc);

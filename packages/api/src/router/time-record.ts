@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { protectedProcedure, createTRPCRouter } from "../trpc";
+
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export const timeRecordRouter = createTRPCRouter({
   all: protectedProcedure

@@ -16,8 +16,16 @@
  * processing a request
  *
  */
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 
+/**
+ * 2. INITIALIZATION
+ *
+ * This is where the trpc api is initialized, connecting the context and
+ * transformer
+ */
+import { TRPCError, initTRPC } from "@trpc/server";
+import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
+import superjson from "superjson";
 import {
   // getServerSession,
   // type Session,
@@ -67,15 +75,6 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
   });
 };
 
-/**
- * 2. INITIALIZATION
- *
- * This is where the trpc api is initialized, connecting the context and
- * transformer
- */
-import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
-
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
   errorFormatter({ shape }) {
@@ -120,7 +119,7 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   //   },
   // });
 
-  if (!ctx.token || !ctx.token.user) {
+  if (!ctx.token?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({

@@ -1,13 +1,14 @@
-import { Team as Teams } from ".prisma/client";
-import clsx from "clsx";
 import type { NextPage } from "next";
 import Link from "next/link";
+import clsx from "clsx";
 import { z } from "zod";
-import { defaultStyle } from "~/components/button";
+
 import { api } from "~/utils/api";
 import { createSSR } from "~/utils/ssr";
+import { defaultStyle } from "~/components/button";
+import { Team } from ".prisma/client";
 
-const CardTeam: React.FC<{ team: Teams }> = ({ team }) => {
+const CardTeam: React.FC<{ team: Team }> = ({ team }) => {
   return (
     <Link
       className="rounded-lg border-2 border-zinc-300 p-3 hover:bg-zinc-600"
