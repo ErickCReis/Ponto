@@ -4,6 +4,7 @@ import type { AppType } from "next/app";
 import { Analytics } from "@vercel/analytics/react";
 import type { Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
+import NextNProgress from "nextjs-progressbar";
 
 import { api } from "~/utils/api";
 import { DefaultLayout } from "~/components/default-layout";
@@ -15,6 +16,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <>
+      <NextNProgress color="#FFF" options={{ showSpinner: false }} />
       <DefaultLayout>
         <SessionProvider session={session}>
           <Component {...pageProps} />

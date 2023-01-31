@@ -111,6 +111,7 @@ importers:
       eslint-config-next: ^13.1.6
       next: ^13.1.6
       next-auth: ^4.19.0
+      nextjs-progressbar: ^0.0.16
       postcss: ^8.4.19
       react: 18.2.0
       react-dom: 18.2.0
@@ -135,6 +136,7 @@ importers:
       dayjs: 1.11.7
       next: 13.1.6_biqbaboplfbrettd7655fr4n2y
       next-auth: 4.19.0_3vryta7zmbcsw4rrqf4axjqggm
+      nextjs-progressbar: 0.0.16_next@13.1.6+react@18.2.0
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       react-hook-form: 7.42.1_react@18.2.0
@@ -2684,7 +2686,7 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-      '@tanstack/react-query': 4.23.0_d7ifg7mz2syj3xnrkygdv3l2qu
+      '@tanstack/react-query': 4.23.0_biqbaboplfbrettd7655fr4n2y
       '@trpc/client': 10.9.0_@trpc+server@10.9.0
       '@trpc/server': 10.9.0
       react: 18.2.0
@@ -2745,6 +2747,10 @@ packages:
 
   /@types/node/18.11.18:
     resolution: {integrity: sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==}
+
+  /@types/nprogress/0.2.0:
+    resolution: {integrity: sha512-1cYJrqq9GezNFPsWTZpFut/d4CjpZqA0vhqDUPFWYKF1oIyBz5qnoYMzR+0C/T96t3ebLAC1SSnwrVOm5/j74A==}
+    dev: false
 
   /@types/prop-types/15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
@@ -7207,6 +7213,19 @@ packages:
       - babel-plugin-macros
     dev: false
 
+  /nextjs-progressbar/0.0.16_next@13.1.6+react@18.2.0:
+    resolution: {integrity: sha512-GV0fD38EMD3vSDCmkq+tObmoup6QA91a6a9MxGuhJZuRk/9TNsrHGnIQQQ/sggkMkXuT4fBgF6jRjFwScDT3zA==}
+    peerDependencies:
+      next: '>= 6.0.0'
+      react: '>= 16.0.0'
+    dependencies:
+      '@types/nprogress': 0.2.0
+      next: 13.1.6_biqbaboplfbrettd7655fr4n2y
+      nprogress: 0.2.0
+      prop-types: 15.8.1
+      react: 18.2.0
+    dev: false
+
   /nice-try/1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
     dev: false
@@ -7292,6 +7311,10 @@ packages:
     engines: {node: '>=4'}
     dependencies:
       path-key: 2.0.1
+    dev: false
+
+  /nprogress/0.2.0:
+    resolution: {integrity: sha512-I19aIingLgR1fmhftnbWWO3dXc0hSxqHQHQb3H8m+K3TnEn/iSeTZZOyvKXWqQESMwuUVnatlCnZdLBZZt2VSA==}
     dev: false
 
   /nullthrows/1.1.1:
