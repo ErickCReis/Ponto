@@ -35,12 +35,14 @@ model Team {
 }
 
 model TeamMember {
-    id        String   @id @default(cuid())
-    teamId    String
-    userId    String
-    role      TeamRole @default(MEMBER)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id            String   @id @default(cuid())
+    teamId        String
+    userId        String
+    role          TeamRole @default(MEMBER)
+    dailyWorkload Int      @default(8)
+    entryTime     Int      @default(9)
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
 
     team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)

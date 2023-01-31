@@ -60,11 +60,17 @@ export const teamMemberRouter = createTRPCRouter({
       });
     }),
   create: protectedProcedure
-    .input(z.string())
+    .input(
+      z.object({
+        teamId: z.string().cuid(),
+        dailyWorkload: z.number().min(1).max(24).default(8),
+        entryTime: z.number().min(0).max(23).default(9),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const team = await ctx.prisma.team.findUnique({
         where: {
-          id: input,
+          id: input.teamId,
         },
       });
 
@@ -96,6 +102,8 @@ export const teamMemberRouter = createTRPCRouter({
           teamId: team.id,
           userId: ctx.token.user.id,
           role: "MEMBER",
+          dailyWorkload: input.dailyWorkload,
+          entryTime: input.entryTime,
         },
       });
 

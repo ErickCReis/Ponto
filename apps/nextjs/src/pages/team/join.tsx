@@ -7,7 +7,9 @@ import { MyForm } from "~/utils/form";
 import { Button } from "~/components/button";
 
 const JoinTeamSchema = z.object({
-  id: z.string(),
+  teamId: z.string(),
+  dailyWorkload: z.number(),
+  entryTime: z.number(),
 });
 
 const JoinTeam: NextPage = () => {
@@ -21,7 +23,7 @@ const JoinTeam: NextPage = () => {
   const onSubmit = (values: z.infer<typeof JoinTeamSchema>) => {
     if (isLoading) return;
 
-    mutate(values.id);
+    mutate(values);
   };
 
   return (
@@ -41,7 +43,13 @@ const JoinTeam: NextPage = () => {
           </div>
         )}
         props={{
-          id: {
+          teamId: {
+            className: "my-2",
+          },
+          dailyWorkload: {
+            className: "my-2",
+          },
+          entryTime: {
             className: "my-2",
           },
         }}
