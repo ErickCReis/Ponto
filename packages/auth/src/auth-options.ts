@@ -62,6 +62,9 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  jwt: {
+    maxAge: 60,
+  },
   providers: [
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID as string,
