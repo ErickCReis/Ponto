@@ -10,7 +10,7 @@ export const getServerSideProps = createSSR(
   }),
   async (ssr, { teamId }) => {
     await ssr.team.get.prefetch(teamId);
-    await ssr.team.members.prefetch(teamId);
+    await ssr.teamMember.all.prefetch(teamId);
   },
 );
 
@@ -18,7 +18,7 @@ const TeamAdmin: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ teamId }) => {
   const { data: team } = api.team.get.useQuery(teamId);
-  const { data: members } = api.team.members.useQuery(teamId);
+  const { data: members } = api.teamMember.all.useQuery(teamId);
 
   return (
     <>

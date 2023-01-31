@@ -12,7 +12,7 @@ const JoinTeamSchema = z.object({
 
 const JoinTeam: NextPage = () => {
   const router = useRouter();
-  const { mutate, isLoading } = api.team.join.useMutation({
+  const { mutate, isLoading } = api.teamMember.create.useMutation({
     onSuccess: async (team) => {
       await router.push(`/team/${team.id}`);
     },
