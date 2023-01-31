@@ -6,7 +6,7 @@ import { DefaultTsFormProps } from "~/utils/form";
 
 type TimeFieldProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
-  "min" | "max"
+  keyof DefaultTsFormProps | "type" | "min" | "max"
 > &
   DefaultTsFormProps & {
     min?: Dayjs;

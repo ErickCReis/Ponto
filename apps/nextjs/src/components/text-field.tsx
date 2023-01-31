@@ -3,7 +3,10 @@ import clsx from "clsx";
 
 import { DefaultTsFormProps } from "~/utils/form";
 
-type TextFieldProps = React.InputHTMLAttributes<HTMLInputElement> &
+type TextFieldProps = Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  keyof DefaultTsFormProps
+> &
   DefaultTsFormProps;
 
 export const TextField = ({

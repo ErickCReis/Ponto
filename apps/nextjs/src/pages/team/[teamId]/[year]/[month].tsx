@@ -47,14 +47,58 @@ const DayRow: React.FC<{
   day: string;
   timeRecords: TimeRecord[];
 }> = ({ day, timeRecords }) => {
+  const cells = useMemo(() => {
+    const cells = [];
+    for (let i = 0; i < Math.max(4, timeRecords.length); i++) {
+      cells.push(timeRecords[i]);
+    }
+    return cells;
+  }, [timeRecords]);
+
+  const { balanceTime, hasDebt } = useMemo(() => {
+    if (timeRecords.length % 2 !== 0) return {};
+
+    const balance = timeRecords.reduce((acc, timeRecord, i) => {
+      const time = dayjs(timeRecord.time);
+
+      if (i % 2 === 0) {
+        return acc - time.valueOf();
+      } else {
+        return acc + time.valueOf();
+      }
+    }, 0);
+
+    return {
+      balanceTime: dayjs().startOf("day").add(balance, "ms"),
+      hasDebt: balance < 8 * 60 * 60 * 1000,
+    };
+  }, [timeRecords]);
+
   return (
-    <div className="flex items-center py-1">
-      <h3 className="text-2xl font-bold">{day.padStart(2, "0")}</h3>
-      <div className="w-6"></div>
-      <div className="flex gap-3">
-        {timeRecords.map((timeRecord) => (
-          <TimeCell key={timeRecord.id} timeRecord={timeRecord} />
-        ))}
+    <div className="flex items-center py-1 gap-4">
+      <h3 className="text-2xl font-bold min-w-[40px]">
+        {day.padStart(2, "0")}
+      </h3>
+      {cells.map((timeRecord, i) => (
+        <div key={timeRecord?.id ?? i} className="flex-1">
+          {timeRecord ? (
+            <TimeCell timeRecord={timeRecord} />
+          ) : (
+            <div className="text-center">--</div>
+          )}
+        </div>
+      ))}
+      <div className="flex-1">
+        {balanceTime && (
+          <div
+            className={clsx(
+              "font-bold text-lg",
+              hasDebt ? "text-red-500" : "text-green-500",
+            )}
+          >
+            {displayTime({ date: balanceTime })}
+          </div>
+        )}
       </div>
     </div>
   );
