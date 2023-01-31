@@ -1,9 +1,16 @@
 import { useTsController } from "@ts-react/form";
 import clsx from "clsx";
 
-type TextFieldProps = React.InputHTMLAttributes<HTMLInputElement>;
+import { DefaultTsFormProps } from "~/utils/form";
 
-export const TextField = ({ className }: TextFieldProps) => {
+type TextFieldProps = React.InputHTMLAttributes<HTMLInputElement> &
+  DefaultTsFormProps;
+
+export const TextField = ({
+  className,
+  enumValues: _,
+  ...rest
+}: TextFieldProps) => {
   const { field, error } = useTsController<string>();
   return (
     <div className="flex flex-col">
@@ -12,6 +19,7 @@ export const TextField = ({ className }: TextFieldProps) => {
           className,
           "rounded-sm border-zinc-400 bg-zinc-400 p-2 placeholder:text-zinc-200",
         )}
+        {...rest}
         value={field.value ? field.value : ""}
         placeholder={field.name}
         onChange={(e) => {
