@@ -40,7 +40,7 @@ export const Header = () => {
       {session?.user && (
         <div className="flex items-center">
           <DropdownMenu.Root>
-            <DropdownMenu.Trigger className={clsx(defaultStyle)}>
+            <DropdownMenu.Trigger className={clsx(defaultStyle, "py-2 px-4")}>
               {session.user.name}
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>
