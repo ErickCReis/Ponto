@@ -9,7 +9,6 @@ export const getServerSideProps = createSSR(
     teamId: z.coerce.string().cuid(),
   }),
   async (ssr, { teamId }) => {
-    await ssr.team.get.prefetch(teamId);
     await ssr.teamMember.all.prefetch(teamId);
   },
 );
@@ -17,16 +16,10 @@ export const getServerSideProps = createSSR(
 const TeamAdmin: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ teamId }) => {
-  const { data: team } = api.team.get.useQuery(teamId);
   const { data: members } = api.teamMember.all.useQuery(teamId);
 
   return (
     <>
-      <div className="h-6"></div>
-      <h1 className="text-center text-4xl font-bold">
-        {team?.name || "Carregando..."}
-      </h1>
-      <div className="h-6"></div>
       <h3 className="text-xl font-bold text-white">Membros</h3>
       <div className="h-4"></div>
       <div className="">

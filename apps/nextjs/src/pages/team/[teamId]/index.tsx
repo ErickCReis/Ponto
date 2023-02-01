@@ -78,8 +78,6 @@ export const getServerSideProps = createSSR(
     teamId: z.coerce.string().cuid(),
   }),
   async (ssr, { teamId }) => {
-    await ssr.team.get.prefetch(teamId);
-
     await ssr.timeRecord.all.prefetch({
       start: dayjs().startOf("day").toDate(),
       end: dayjs().endOf("day").toDate(),
@@ -98,20 +96,10 @@ export const getServerSideProps = createSSR(
 const Team: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ clock, teamId }) => {
-  const { data: team } = api.team.get.useQuery(teamId);
-
   return (
     <>
-      <div className="h-6"></div>
-      <h1 className="text-center text-4xl font-bold">
-        {team?.name || "Carregando..."}
-      </h1>
-      <div className="h-6"></div>
-
       <Clock initialTime={clock} />
-
       <div className="h-6"></div>
-
       <MarkTimeButton teamId={teamId} />
       <RegisteredTimes teamId={teamId} />
     </>

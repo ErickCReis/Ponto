@@ -14,7 +14,9 @@ export const DefaultLayout: React.FC<{
       </Head>
       <div className="flex h-screen flex-col items-center overflow-auto bg-zinc-700 text-white">
         <Header />
-        <main className="container flex flex-col items-center">{children}</main>
+        <main className="container flex flex-col items-center py-6">
+          {children}
+        </main>
       </div>
     </>
   );

@@ -32,7 +32,7 @@ const TimeCell: React.FC<{ timeRecord: TimeRecord }> = ({ timeRecord }) => {
     <>
       <button
         className={clsx(
-          "text-lg hover:text-red-500",
+          "text-md hover:text-red-500",
           isConfirm && "text-red-500",
         )}
         onClick={handleClick}
@@ -49,13 +49,13 @@ const DayRow: React.FC<{
 }> = ({ day, timeRecords }) => {
   const cells = useMemo(() => {
     const cells = [];
-    for (let i = 0; i < Math.max(4, timeRecords.length); i++) {
+    for (let i = 0; i < Math.max(6, timeRecords.length); i++) {
       cells.push(timeRecords[i]);
     }
     return cells;
   }, [timeRecords]);
 
-  const { balanceTime, hasDebt } = useMemo(() => {
+  const { totalTime, balanceTime, hasDebit } = useMemo(() => {
     if (timeRecords.length % 2 !== 0) return {};
 
     const balance = timeRecords.reduce((acc, timeRecord, i) => {
@@ -69,37 +69,40 @@ const DayRow: React.FC<{
     }, 0);
 
     return {
-      balanceTime: dayjs().startOf("day").add(balance, "ms"),
-      hasDebt: balance < 8 * 60 * 60 * 1000,
+      totalTime: dayjs().startOf("day").add(balance, "ms"),
+      balanceTime: dayjs()
+        .startOf("day")
+        .add(Math.abs(balance - 8 * 60 * 60 * 1000)),
+      hasDebit: balance < 8 * 60 * 60 * 1000,
     };
   }, [timeRecords]);
 
   return (
-    <div className="flex items-center py-1 gap-4">
-      <h3 className="text-2xl font-bold min-w-[40px]">
-        {day.padStart(2, "0")}
-      </h3>
+    <div className="flex items-center text-center py-1">
+      <h3 className="text-2xl font-bold w-10">{day.padStart(2, "0")}</h3>
+      <div className="w-4"></div>
       {cells.map((timeRecord, i) => (
-        <div key={timeRecord?.id ?? i} className="flex-1">
-          {timeRecord ? (
-            <TimeCell timeRecord={timeRecord} />
-          ) : (
-            <div className="text-center">--</div>
-          )}
+        <div key={timeRecord?.id ?? i} className="w-14 text-center">
+          {timeRecord ? <TimeCell timeRecord={timeRecord} /> : "--"}
         </div>
       ))}
-      <div className="flex-1">
-        {balanceTime && (
-          <div
-            className={clsx(
-              "font-bold text-lg",
-              hasDebt ? "text-red-500" : "text-green-500",
-            )}
-          >
-            {displayTime({ date: balanceTime })}
-          </div>
-        )}
-      </div>
+      <div className="w-4"></div>
+      {balanceTime && (
+        <div className={clsx("font-bold text-lg w-16")}>
+          {displayTime({ date: totalTime })}
+        </div>
+      )}
+      <div className="w-4"></div>
+      {balanceTime && (
+        <div
+          className={clsx(
+            "font-bold text-lg w-16",
+            hasDebit ? "text-red-500" : "text-green-500",
+          )}
+        >
+          {displayTime({ date: balanceTime })}
+        </div>
+      )}
     </div>
   );
 };
@@ -177,8 +180,6 @@ export const getServerSideProps = createSSR(
     month: z.coerce.number().min(1).max(12),
   }),
   async (ssr, { teamId, year, month }) => {
-    await ssr.team.get.prefetch(teamId);
-
     const date = dayjs()
       .month(month - 1)
       .year(year);
@@ -204,8 +205,6 @@ const Registros: NextPage<
     teamId,
   });
 
-  const { data: team } = api.team.get.useQuery(teamId);
-
   const groupByDay = useMemo(
     () =>
       timeRecords?.reduce((acc, timeRecord) => {
@@ -219,11 +218,6 @@ const Registros: NextPage<
 
   return (
     <>
-      <div className="h-6"></div>
-      <h1 className="text-center text-4xl font-bold">
-        {team?.name || "Carregando..."}
-      </h1>
-      <div className="h-6"></div>
       <h2 className="flex text-2xl font-bold">
         <Link
           className="text-xl font-bold"
@@ -245,6 +239,13 @@ const Registros: NextPage<
       <AddTime teamId={teamId} date={date} />
       <div className="h-6"></div>
       <div className="flex flex-col">
+        <div className="flex text-center gap-4">
+          <div className="w-10">DIA</div>
+          <div className="w-[336px]">PONTOS</div>
+          <div className="w-16">TOTAL</div>
+          <div className="w-16">SALDO</div>
+        </div>
+        <div className="h-2"></div>
         {Object.entries(groupByDay).map(([day, times]) => (
           <DayRow key={day} day={day} timeRecords={times} />
         ))}
