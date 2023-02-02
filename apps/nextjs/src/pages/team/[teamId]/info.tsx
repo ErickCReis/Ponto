@@ -7,7 +7,9 @@ import { createSSR } from "~/utils/ssr";
 import { Button } from "~/components/button";
 
 const InfoTeamSchema = z.object({
-  dailyWorkload: z.number().describe("Carga horária // Digite a carga horária"),
+  dailyWorkload: z
+    .number()
+    .describe("Carga horária (horas) // Digite a carga horária"),
   initialBalanceInMinutes: z
     .number()
     .describe("Saldo inicial (minutos) // Saldo inicial em minutos"),
@@ -20,6 +22,7 @@ export const getServerSideProps = createSSR(
   async (ssr, { teamId }) => {
     await ssr.auth.getSession.prefetch();
     await ssr.teamMember.get.prefetch({ teamId });
+    await ssr.timeRecord.history.prefetch({ teamId });
   },
 );
 
@@ -28,10 +31,12 @@ const InfoTeam: NextPage<
 > = ({ teamId }) => {
   const utils = api.useContext();
   const { data: session } = api.auth.getSession.useQuery();
-  const { data: teamMember } = api.teamMember.get.useQuery({ teamId: teamId });
+  const { data: teamMember } = api.teamMember.get.useQuery({ teamId });
+  const { data: history } = api.timeRecord.history.useQuery({ teamId });
   const { mutate, isLoading } = api.teamMember.update.useMutation({
     onSuccess: async () => {
-      await utils.teamMember.get.refetch({ teamId: teamId });
+      await utils.teamMember.get.refetch({ teamId });
+      await utils.timeRecord.history.refetch({ teamId });
     },
   });
 
@@ -47,6 +52,28 @@ const InfoTeam: NextPage<
     <>
       <div className="h-6"></div>
       <h2 className="text-center text-2xl font-bold">Olá {session?.name}!</h2>
+      <div className="h-6"></div>
+
+      <div className="text-xl font-bold">Histórico</div>
+      <div className="h-4"></div>
+      <div className="flex flex-col text-center min-w-[400px]">
+        <div className="flex font-bold">
+          <div className="flex-1">MÊS</div>
+          <div className="flex-1">SALDO</div>
+          <div className="flex-1">ACUMULADO</div>
+        </div>
+        {history?.map((month, i) => (
+          <div key={i} className="flex">
+            <div className="flex-1">{month.label}</div>
+            <div className="flex-1">
+              {(month.balance / 1000 / 60 / 60).toFixed(1)} horas
+            </div>
+            <div className="flex-1">
+              {(month.accumulatedBalance / 1000 / 60 / 60).toFixed(1)} horas
+            </div>
+          </div>
+        ))}
+      </div>
       <div className="h-6"></div>
 
       <div className="text-xl font-bold">Configurações</div>

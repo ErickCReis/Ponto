@@ -46,7 +46,8 @@ const TimeCell: React.FC<{ timeRecord: TimeRecord }> = ({ timeRecord }) => {
 const DayRow: React.FC<{
   day: string;
   timeRecords: TimeRecord[];
-}> = ({ day, timeRecords }) => {
+  dailyWorkload: number;
+}> = ({ day, timeRecords, dailyWorkload }) => {
   const cells = useMemo(() => {
     const cells = [];
     for (let i = 0; i < Math.max(6, timeRecords.length); i++) {
@@ -72,10 +73,10 @@ const DayRow: React.FC<{
       totalTime: dayjs().startOf("day").add(balance, "ms"),
       balanceTime: dayjs()
         .startOf("day")
-        .add(Math.abs(balance - 8 * 60 * 60 * 1000)),
-      hasDebit: balance < 8 * 60 * 60 * 1000,
+        .add(Math.abs(balance - dailyWorkload * 60 * 60 * 1000)),
+      hasDebit: balance < dailyWorkload * 60 * 60 * 1000,
     };
-  }, [timeRecords]);
+  }, [timeRecords, dailyWorkload]);
 
   return (
     <div className="flex items-center text-center py-1">
@@ -189,6 +190,8 @@ export const getServerSideProps = createSSR(
       end: date.endOf("month").toDate(),
       teamId,
     });
+
+    await ssr.teamMember.get.prefetch({ teamId });
   },
 );
 
@@ -204,6 +207,8 @@ const Registros: NextPage<
     end: date.endOf("month").toDate(),
     teamId,
   });
+
+  const { data: teamMember } = api.teamMember.get.useQuery({ teamId });
 
   const groupByDay = useMemo(
     () =>
@@ -247,7 +252,12 @@ const Registros: NextPage<
         </div>
         <div className="h-2"></div>
         {Object.entries(groupByDay).map(([day, times]) => (
-          <DayRow key={day} day={day} timeRecords={times} />
+          <DayRow
+            key={day}
+            day={day}
+            timeRecords={times}
+            dailyWorkload={teamMember?.dailyWorkload ?? 8}
+          />
         ))}
       </div>
     </>

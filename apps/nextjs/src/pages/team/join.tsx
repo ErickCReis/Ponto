@@ -8,7 +8,9 @@ import { Button } from "~/components/button";
 
 const JoinTeamSchema = z.object({
   teamId: z.string().describe("ID do time // ID do time"),
-  dailyWorkload: z.number().describe("Carga horária // Carga horária diária"),
+  dailyWorkload: z
+    .number()
+    .describe("Carga horária (horas) // Carga horária diária"),
   initialBalanceInMinutes: z
     .number()
     .describe("Saldo inicial (minutos) // Saldo inicial em minutos"),
