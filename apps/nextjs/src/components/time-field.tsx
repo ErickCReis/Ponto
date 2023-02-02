@@ -18,6 +18,8 @@ export const TimeField = ({
   min,
   max,
   enumValues: _,
+  beforeElement: __,
+  afterElement: ___,
   ...rest
 }: TimeFieldProps) => {
   const { field, error } = useTsController<Date>();

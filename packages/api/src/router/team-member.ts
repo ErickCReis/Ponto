@@ -48,14 +48,39 @@ export const teamMemberRouter = createTRPCRouter({
   get: protectedProcedure
     .input(
       z.object({
-        userId: z.string().cuid(),
+        userId: z.string().cuid().optional(),
         teamId: z.string().cuid(),
       }),
     )
-    .query(({ ctx, input }) => {
+    .query(async ({ ctx, input }) => {
+      if (input.userId) {
+        const teamMember = await ctx.prisma.teamMember.findUnique({
+          where: {
+            teamId_userId: { userId: ctx.token.user.id, teamId: input.teamId },
+          },
+        });
+
+        if (!teamMember) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Usuário não encontrado",
+          });
+        }
+
+        if (teamMember.role !== "ADMIN") {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Você não tem permissão para ver os membros",
+          });
+        }
+      }
+
       return ctx.prisma.teamMember.findUnique({
         where: {
-          teamId_userId: { userId: input.userId, teamId: input.teamId },
+          teamId_userId: {
+            userId: input.userId ?? ctx.token.user.id,
+            teamId: input.teamId,
+          },
         },
       });
     }),
@@ -64,7 +89,7 @@ export const teamMemberRouter = createTRPCRouter({
       z.object({
         teamId: z.string().cuid(),
         dailyWorkload: z.number().min(1).max(24).default(8),
-        entryTime: z.number().min(0).max(23).default(9),
+        initialBalanceInMinutes: z.number().default(0),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -103,10 +128,50 @@ export const teamMemberRouter = createTRPCRouter({
           userId: ctx.token.user.id,
           role: "MEMBER",
           dailyWorkload: input.dailyWorkload,
-          entryTime: input.entryTime,
+          initialBalanceInMinutes: input.initialBalanceInMinutes,
         },
       });
 
       return team;
+    }),
+  update: protectedProcedure
+    .input(
+      z.object({
+        teamId: z.string().cuid(),
+        dailyWorkload: z.number().min(1).max(24).optional(),
+        initialBalanceInMinutes: z.number().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const teamMember = await ctx.prisma.teamMember.findUnique({
+        where: {
+          teamId_userId: {
+            teamId: input.teamId,
+            userId: ctx.token.user.id,
+          },
+        },
+      });
+
+      if (!teamMember) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Você não está nesse time",
+        });
+      }
+
+      await ctx.prisma.teamMember.update({
+        where: {
+          teamId_userId: {
+            teamId: input.teamId,
+            userId: ctx.token.user.id,
+          },
+        },
+        data: {
+          dailyWorkload: input.dailyWorkload,
+          initialBalanceInMinutes: input.initialBalanceInMinutes,
+        },
+      });
+
+      return teamMember;
     }),
 });

@@ -7,9 +7,11 @@ import { MyForm } from "~/utils/form";
 import { Button } from "~/components/button";
 
 const JoinTeamSchema = z.object({
-  teamId: z.string(),
-  dailyWorkload: z.number(),
-  entryTime: z.number(),
+  teamId: z.string().describe("ID do time // ID do time"),
+  dailyWorkload: z.number().describe("Carga horária // Carga horária diária"),
+  initialBalanceInMinutes: z
+    .number()
+    .describe("Saldo inicial (minutos) // Saldo inicial em minutos"),
 });
 
 const JoinTeam: NextPage = () => {
@@ -42,15 +44,17 @@ const JoinTeam: NextPage = () => {
             </Button>
           </div>
         )}
+        defaultValues={{
+          initialBalanceInMinutes: 0,
+        }}
         props={{
-          teamId: {
-            className: "my-2",
-          },
           dailyWorkload: {
-            className: "my-2",
+            type: "number",
+            beforeElement: <div className="h-2"></div>,
           },
-          entryTime: {
-            className: "my-2",
+          initialBalanceInMinutes: {
+            type: "number",
+            beforeElement: <div className="h-2"></div>,
           },
         }}
       />

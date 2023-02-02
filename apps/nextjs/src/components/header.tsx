@@ -30,11 +30,16 @@ export const Header = () => {
           )}
         </li>
         {team && session?.user && !isAdminPath && (
-          <li>
-            <Link href={`/team/${team.id}/${dayjs().format("YYYY/M")}`}>
-              Registros
-            </Link>
-          </li>
+          <>
+            <li>
+              <Link href={`/team/${team.id}/${dayjs().format("YYYY/M")}`}>
+                Registros
+              </Link>
+            </li>
+            <li>
+              <Link href={`/team/${team.id}/info`}>Resumo</Link>
+            </li>
+          </>
         )}
       </ul>
       {session?.user && (

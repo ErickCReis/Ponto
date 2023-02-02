@@ -12,6 +12,8 @@ export type DefaultTsFormProps = {
   enumValues?: string[];
   label?: string;
   placeholder?: string;
+  beforeElement?: ReactNode;
+  afterElement?: ReactNode;
 };
 
 const mapping = [
