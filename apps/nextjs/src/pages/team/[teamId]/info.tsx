@@ -20,7 +20,6 @@ export const getServerSideProps = createSSR(
     teamId: z.coerce.string().cuid(),
   }),
   async (ssr, { teamId }) => {
-    await ssr.auth.getSession.prefetch();
     await ssr.teamMember.get.prefetch({ teamId });
     await ssr.timeRecord.history.prefetch({ teamId });
   },
@@ -30,7 +29,6 @@ const InfoTeam: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ teamId }) => {
   const utils = api.useContext();
-  const { data: session } = api.auth.getSession.useQuery();
   const { data: teamMember } = api.teamMember.get.useQuery({ teamId });
   const { data: history } = api.timeRecord.history.useQuery({ teamId });
   const { mutate, isLoading } = api.teamMember.update.useMutation({
@@ -43,17 +41,17 @@ const InfoTeam: NextPage<
   const onSubmit = (values: z.infer<typeof InfoTeamSchema>) => {
     if (isLoading) return;
 
-    if (teamMember?.dailyWorkload === values.dailyWorkload) return;
+    if (
+      teamMember?.dailyWorkload === values.dailyWorkload &&
+      teamMember?.initialBalanceInMinutes == values.initialBalanceInMinutes
+    )
+      return;
 
     mutate({ ...values, teamId: teamId });
   };
 
   return (
     <>
-      <div className="h-6"></div>
-      <h2 className="text-center text-2xl font-bold">Olá {session?.name}!</h2>
-      <div className="h-6"></div>
-
       <div className="text-xl font-bold">Histórico</div>
       <div className="h-4"></div>
       <div className="flex flex-col text-center min-w-[400px]">
