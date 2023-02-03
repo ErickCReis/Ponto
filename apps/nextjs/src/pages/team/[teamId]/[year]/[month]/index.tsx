@@ -8,6 +8,7 @@ import { RouterOutputs, api } from "~/utils/api";
 import dayjs, { Dayjs, dayjsLib, displayTime } from "~/utils/dayjs";
 import { createMyForm } from "~/utils/form";
 import { createSSR } from "~/utils/ssr";
+import { defaultStyle } from "~/components/button";
 import { useConfirmClick } from "~/hooks/use-confirm-click";
 
 type TimeRecord = RouterOutputs["timeRecord"]["all"][number];
@@ -119,7 +120,7 @@ const AddTimeForm = ({
   children: ReactNode;
   onSubmit: () => void;
 }) => {
-  const { handleClick, textToShow, isConfirm } = useConfirmClick({
+  const { handleClick, textToShow } = useConfirmClick({
     text: "Adicionar",
     onConfirm: onSubmit,
   });
@@ -129,7 +130,7 @@ const AddTimeForm = ({
       {children}
       <button
         type="submit"
-        className={clsx("hover:text-green-500", isConfirm && "text-green-500")}
+        className={clsx(defaultStyle)}
         onClick={(e) => {
           e.preventDefault();
           handleClick();
@@ -241,7 +242,17 @@ const Registros: NextPage<
         </Link>
       </h2>
       <div className="h-6"></div>
-      <AddTime teamId={teamId} date={date} />
+      <div className="flex">
+        <AddTime teamId={teamId} date={date} />
+        <div className="w-4"></div>
+        <Link
+          className={clsx(defaultStyle)}
+          href={`/team/${teamId}/${year}/${month}/import`}
+        >
+          Importar planilha Kayo
+        </Link>
+      </div>
+
       <div className="h-6"></div>
       <div className="flex flex-col">
         <div className="flex text-center gap-4">
