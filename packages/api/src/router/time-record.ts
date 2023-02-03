@@ -83,7 +83,7 @@ export const timeRecordRouter = createTRPCRouter({
       const teamMember = await ctx.prisma.teamMember.findFirst({
         where: {
           teamId: input.teamId,
-          userId: input.userId ?? ctx.token.user.id,
+          userId: ctx.token.user.id,
         },
       });
 

@@ -76,6 +76,9 @@ export const teamMemberRouter = createTRPCRouter({
       }
 
       return ctx.prisma.teamMember.findUnique({
+        include: {
+          user: true,
+        },
         where: {
           teamId_userId: {
             userId: input.userId ?? ctx.token.user.id,
