@@ -245,10 +245,7 @@ const Registros: NextPage<
       <div className="flex">
         <AddTime teamId={teamId} date={date} />
         <div className="w-4"></div>
-        <Link
-          className={clsx(defaultStyle)}
-          href={`/team/${teamId}/${year}/${month}/import`}
-        >
+        <Link className={clsx(defaultStyle)} href={`/team/${teamId}/import`}>
           Importar planilha Kayo
         </Link>
       </div>

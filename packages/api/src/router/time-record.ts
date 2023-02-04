@@ -63,6 +63,22 @@ export const timeRecordRouter = createTRPCRouter({
         },
       });
     }),
+  batch: protectedProcedure
+    .input(
+      z.object({
+        teamId: z.string(),
+        timeRecords: z.array(z.date()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ctx.prisma.timeRecord.createMany({
+        data: input.timeRecords.map((time) => ({
+          userId: ctx.token.user.id,
+          teamId: input.teamId,
+          time,
+        })),
+      });
+    }),
   delete: protectedProcedure
     .input(z.string().cuid())
     .mutation(({ ctx, input }) => {
