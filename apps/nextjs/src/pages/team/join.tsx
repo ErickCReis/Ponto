@@ -1,10 +1,27 @@
-import type { NextPage } from "next";
+import type { InferGetServerSidePropsType, NextPage } from "next";
 import { useRouter } from "next/router";
 import { z } from "zod";
 
 import { api } from "~/utils/api";
 import { MyForm } from "~/utils/form";
+import { createSSR } from "~/utils/ssr";
 import { Button } from "~/components/button";
+
+export const getServerSideProps = createSSR(
+  z.object({
+    teamId: z.string().cuid().optional(),
+  }),
+  async (_, { teamId }) => {
+    if (!teamId) return;
+
+    return {
+      result: "success",
+      data: {
+        teamId,
+      },
+    };
+  },
+);
 
 const JoinTeamSchema = z.object({
   teamId: z.string().describe("ID do time // ID do time"),
@@ -16,7 +33,9 @@ const JoinTeamSchema = z.object({
     .describe("Saldo inicial (minutos) // Saldo inicial em minutos"),
 });
 
-const JoinTeam: NextPage = () => {
+const JoinTeam: NextPage<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ teamId }) => {
   const router = useRouter();
   const { mutate, isLoading } = api.teamMember.create.useMutation({
     onSuccess: async (team) => {
@@ -47,6 +66,7 @@ const JoinTeam: NextPage = () => {
           </div>
         )}
         defaultValues={{
+          teamId,
           initialBalanceInMinutes: 0,
         }}
         props={{

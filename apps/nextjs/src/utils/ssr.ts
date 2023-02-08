@@ -1,5 +1,5 @@
 import { ParsedUrlQuery } from "querystring";
-import { GetServerSideProps } from "next";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { DehydratedState } from "@tanstack/react-query";
 import { createProxySSGHelpers } from "@trpc/react-query/ssg";
 import { z } from "zod";
@@ -36,6 +36,7 @@ export const createSSR = <Q, R>(
   callback: <SSRContext extends ReturnType<typeof getContext>>(
     ssrContext: SSRContext,
     query: Q,
+    req: GetServerSidePropsContext["req"],
   ) => Promise<SuccessType<R> | RedirectType | ErrorType | void>,
 ) => {
   const getServerSideProps: GetServerSideProps<
@@ -50,7 +51,7 @@ export const createSSR = <Q, R>(
 
     const ssr = getContext(token);
 
-    const callbackResult = await callback(ssr, parsedQuery);
+    const callbackResult = await callback(ssr, parsedQuery, req);
 
     if (callbackResult?.result === "error") {
       return {
