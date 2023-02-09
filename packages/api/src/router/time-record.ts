@@ -173,7 +173,6 @@ export const timeRecordRouter = createTRPCRouter({
           );
 
           lastMonthBalance += monthBalance;
-
           historyResult.push({
             label: `${year}/${Number(month) + 1}`,
             balance: monthBalance,

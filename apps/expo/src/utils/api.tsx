@@ -1,12 +1,4 @@
-/**
- * A wrapper for your app that provides the TRPC context.
- * Use only in _app.tsx
- */
 import React from "react";
-/**
- * Extend this function when going to production by
- * setting the baseUrl to your production API URL.
- */
 import Constants from "expo-constants";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
@@ -32,6 +24,10 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
  **/
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
+/**
+ * Extend this function when going to production by
+ * setting the baseUrl to your production API URL.
+ */
 const getBaseUrl = () => {
   /**
    * Gets the IP address of your host-machine. If it cannot automatically find it,
@@ -44,6 +40,10 @@ const getBaseUrl = () => {
   return `http://${localhost}:3000`;
 };
 
+/**
+ * A wrapper for your app that provides the TRPC context.
+ * Use only in _app.tsx
+ */
 export const TRPCProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {

@@ -1,6 +1,12 @@
 /** @type {import("eslint").Linter.Config} */
 const config = {
   extends: ["prettier", "eslint:recommended"],
+  parserOptions: {
+    ecmaVersion: "latest",
+  },
+  env: {
+    es6: true,
+  },
   overrides: [
     {
       extends: [
@@ -9,6 +15,7 @@ const config = {
       ],
       files: ["**/*.ts", "**/*.tsx"],
       parserOptions: {
+        ecmaVersion: "latest",
         tsconfigRootDir: __dirname,
         project: [
           "./tsconfig.json",
@@ -26,6 +33,7 @@ const config = {
           },
         ],
         "@typescript-eslint/require-await": "off",
+        "@typescript-eslint/no-non-null-assertion": "off",
       },
     },
   ],
