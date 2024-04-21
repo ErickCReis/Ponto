@@ -1,25 +1,27 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { and, eq, gte, lte, schema } from "@acme/db";
 
-export const timeRecordRouter = createTRPCRouter({
+import { protectedProcedure } from "../trpc";
+
+export const timeRecordRouter = {
   all: protectedProcedure
     .input(
       z.object({
         start: z.date().optional(),
         end: z.date().optional(),
-        teamId: z.string().cuid(),
-        userId: z.string().cuid().optional(),
+        teamId: z.string().uuid(),
+        userId: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      if (!!input.userId && ctx.token.user.id !== input.userId) {
-        const teamMember = await ctx.prisma.teamMember.findFirst({
-          where: {
-            teamId: input.teamId,
-            userId: ctx.token.user.id,
-          },
+      if (!!input.userId && ctx.session.user.id !== input.userId) {
+        const teamMember = await ctx.db.query.teamMember.findFirst({
+          where: and(
+            eq(schema.teamMember.teamId, input.teamId),
+            eq(schema.teamMember.userId, ctx.session.user.id),
+          ),
         });
 
         if (teamMember?.role !== "ADMIN") {
@@ -30,21 +32,25 @@ export const timeRecordRouter = createTRPCRouter({
         }
       }
 
-      return ctx.prisma.timeRecord.findMany({
-        select: {
+      return ctx.db.query.timeRecord.findMany({
+        columns: {
           id: true,
           teamId: true,
           userId: true,
           time: true,
         },
-        where: {
-          userId: input.userId ?? ctx.token.user.id,
-          time: { gte: input?.start, lte: input?.end },
-          teamId: input.teamId,
-        },
-        orderBy: {
-          time: "asc",
-        },
+        // where: {
+        //   userId: input.userId ?? ctx.session.user.id,
+        //   time: { gte: input?.start, lte: input?.end },
+        //   teamId: input.teamId,
+        // },
+        where: and(
+          eq(schema.timeRecord.teamId, input.teamId),
+          eq(schema.timeRecord.userId, input.userId ?? ctx.session.user.id),
+          input.start && gte(schema.timeRecord.time, input.start),
+          input.end && lte(schema.timeRecord.time, input.end),
+        ),
+        orderBy: schema.timeRecord.time,
       });
     }),
   create: protectedProcedure
@@ -55,12 +61,10 @@ export const timeRecordRouter = createTRPCRouter({
       }),
     )
     .mutation(({ ctx, input }) => {
-      return ctx.prisma.timeRecord.create({
-        data: {
-          userId: ctx.token.user.id,
-          teamId: input.teamId,
-          time: input.time,
-        },
+      return ctx.db.insert(schema.timeRecord).values({
+        userId: ctx.session.user.id,
+        teamId: input.teamId,
+        time: input.time,
       });
     }),
   batch: protectedProcedure
@@ -71,41 +75,37 @@ export const timeRecordRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return ctx.prisma.timeRecord.createMany({
-        data: input.timeRecords.map((time) => ({
-          userId: ctx.token.user.id,
+      return ctx.db.insert(schema.timeRecord).values(
+        input.timeRecords.map((time) => ({
+          userId: ctx.session.user.id,
           teamId: input.teamId,
           time,
         })),
-      });
+      );
     }),
-  delete: protectedProcedure
-    .input(z.string().cuid())
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.timeRecord.delete({
-        where: {
-          id: input,
-        },
-      });
-    }),
+  delete: protectedProcedure.input(z.number()).mutation(({ ctx, input }) => {
+    return ctx.db
+      .delete(schema.timeRecord)
+      .where(eq(schema.timeRecord.id, input));
+  }),
   history: protectedProcedure
     .input(
       z.object({
-        teamId: z.string().cuid(),
-        userId: z.string().cuid().optional(),
+        teamId: z.string().uuid(),
+        userId: z.string().uuid().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const teamMember = await ctx.prisma.teamMember.findFirst({
-        where: {
-          teamId: input.teamId,
-          userId: ctx.token.user.id,
-        },
+      const teamMember = await ctx.db.query.teamMember.findFirst({
+        where: and(
+          eq(schema.teamMember.teamId, input.teamId),
+          eq(schema.teamMember.userId, ctx.session.user.id),
+        ),
       });
 
       if (
         !!input.userId &&
-        ctx.token.user.id !== input.userId &&
+        ctx.session.user.id !== input.userId &&
         teamMember?.role !== "ADMIN"
       ) {
         throw new TRPCError({
@@ -114,32 +114,33 @@ export const timeRecordRouter = createTRPCRouter({
         });
       }
 
-      const timeRecords = await ctx.prisma.timeRecord.findMany({
-        select: {
+      const timeRecords = await ctx.db.query.timeRecord.findMany({
+        columns: {
           time: true,
         },
-        where: {
-          userId: input.userId ?? ctx.token.user.id,
-          teamId: input.teamId,
-        },
-        orderBy: {
-          time: "asc",
-        },
+        where: and(
+          eq(schema.timeRecord.teamId, input.teamId),
+          eq(schema.timeRecord.userId, input.userId ?? ctx.session.user.id),
+        ),
+        orderBy: schema.timeRecord.time,
       });
 
       const groupByYearMonthDay =
-        timeRecords?.reduce((acc, timeRecord) => {
-          const day = timeRecord.time.getDate();
-          const month = timeRecord.time.getMonth();
-          const year = timeRecord.time.getFullYear();
+        timeRecords?.reduce(
+          (acc, timeRecord) => {
+            const day = timeRecord.time.getDate();
+            const month = timeRecord.time.getMonth();
+            const year = timeRecord.time.getFullYear();
 
-          if (!acc[year]) acc[year] = {};
-          if (!acc[year]?.[month]) acc[year]![month] = {};
-          if (!acc[year]?.[month]?.[day]) acc[year]![month]![day] = [];
+            if (!acc[year]) acc[year] = {};
+            if (!acc[year]?.[month]) acc[year]![month] = {};
+            if (!acc[year]?.[month]?.[day]) acc[year]![month]![day] = [];
 
-          acc[year]![month]![day]!.push(timeRecord.time);
-          return acc;
-        }, {} as Record<number, Record<number, Record<number, Date[]>>>) ?? {};
+            acc[year]![month]![day]!.push(timeRecord.time);
+            return acc;
+          },
+          {} as Record<number, Record<number, Record<number, Date[]>>>,
+        ) ?? {};
 
       const historyResult: {
         label: string;
@@ -183,4 +184,4 @@ export const timeRecordRouter = createTRPCRouter({
 
       return historyResult;
     }),
-});
+};

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { displayTime } from "~/utils/dayjs";
+import { displayTime } from "~/old/utils/dayjs";
 
 export const useClock = ({
   initialTime,
