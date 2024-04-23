@@ -1,4 +1,5 @@
 {
+  "regions": ["iad1"],
   "github": {
     "silent": true
   }
