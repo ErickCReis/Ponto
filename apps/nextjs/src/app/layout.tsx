@@ -1,6 +1,6 @@
+import type { Metadata, Viewport } from "next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
-import type { Metadata, Viewport } from "next";
 
 import { cn } from "@acme/ui";
 import { ThemeProvider, ThemeToggle } from "@acme/ui/theme";
@@ -10,14 +10,15 @@ import { TRPCReactProvider } from "~/trpc/react";
 
 import "~/app/globals.css";
 
+import { env } from "~/env.mjs";
 import { Header } from "./_components/header";
 
-export const runtime = "edge"
-export const preferredRegion = ["iad1"]
+export const runtime = "edge";
+export const preferredRegion = ["iad1"];
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.VERCEL_ENV === "production"
+    env.VERCEL_ENV === "production"
       ? "https://turbo.t3.gg"
       : "http://localhost:3000",
   ),

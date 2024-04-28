@@ -25,40 +25,34 @@ export default async function Page({ params }: { params: { teamId: string } }) {
   const teamMembers = await api.teamMember.all(team.id);
 
   return (
-    <main className="h-full">
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-        <h1 className="border-b border-primary text-xl font-semibold">
-          {team.name}
-        </h1>
+    <>
+      <h2 className="text-xl font-semibold">Convide novos membros</h2>
 
-        <h2 className="text-xl font-semibold">Convide novos membros</h2>
+      <CopyText copyText={`${host}/team/join?teamId=${team.id}`} />
 
-        <CopyText copyText={`${host}/team/join?teamId=${team.id}`} />
+      <h2 className="text-xl font-semibold">Membros</h2>
 
-        <h2 className="text-xl font-semibold">Membros</h2>
-
-        <div className="flex flex-col gap-2">
-          {teamMembers.map((member) => (
-            <Button
-              variant="outline"
-              className="w-full gap-2"
-              key={member.id}
-              asChild
-            >
-              <Link href={`/team/${team.id}/admin/${member.id}`}>
-                <Badge
-                  variant={member.role === "ADMIN" ? "default" : "secondary"}
-                >
-                  {member.id === session?.user.id ? "VOCÊ" : member.role}
-                </Badge>
-                <span>{member.name}</span>
-                <div className="flex-1"></div>
-                <span>visualizar</span>
-              </Link>
-            </Button>
-          ))}
-        </div>
+      <div className="flex flex-col gap-2">
+        {teamMembers.map((member) => (
+          <Button
+            variant="outline"
+            className="w-full gap-2"
+            key={member.id}
+            asChild
+          >
+            <Link href={`/team/${team.id}/admin/${member.id}`}>
+              <Badge
+                variant={member.role === "ADMIN" ? "default" : "secondary"}
+              >
+                {member.id === session?.user.id ? "VOCÊ" : member.role}
+              </Badge>
+              <span>{member.name}</span>
+              <div className="flex-1"></div>
+              <span>visualizar</span>
+            </Link>
+          </Button>
+        ))}
       </div>
-    </main>
+    </>
   );
 }

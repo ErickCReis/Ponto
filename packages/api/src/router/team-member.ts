@@ -85,6 +85,7 @@ export const teamMemberRouter = {
           name: schema.users.name,
           email: schema.users.email,
           role: schema.teamMember.role,
+          dailyWorkload: schema.teamMember.dailyWorkload,
           createdAt: schema.teamMember.createdAt,
         })
         .from(schema.users)
