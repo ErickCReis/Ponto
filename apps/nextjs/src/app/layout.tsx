@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
@@ -6,12 +8,11 @@ import { cn } from "@acme/ui";
 import { ThemeProvider, ThemeToggle } from "@acme/ui/theme";
 import { Toaster } from "@acme/ui/toast";
 
+import { env } from "~/env";
 import { TRPCReactProvider } from "~/trpc/react";
+import { Header } from "./_components/header";
 
 import "~/app/globals.css";
-
-import { env } from "~/env";
-import { Header } from "./_components/header";
 
 export const runtime = "edge";
 export const preferredRegion = ["iad1"];
@@ -67,6 +68,8 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           </div>
           <Toaster />
         </ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
