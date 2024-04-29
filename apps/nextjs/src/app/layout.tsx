@@ -58,7 +58,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           <TRPCReactProvider>
             <div className="container flex h-screen flex-col">
               <Header />
-              <div className="py-6">{props.children}</div>
+              <div className="py-4 sm:py-6">{props.children}</div>
             </div>
           </TRPCReactProvider>
 

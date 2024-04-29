@@ -1,22 +1,15 @@
+"use client";
+
 import { useState } from "react";
-import { InferGetServerSidePropsType, NextPage } from "next";
-import { useRouter } from "next/router";
-import clsx from "clsx";
-import { z } from "zod";
+import { useRouter } from "next/navigation";
 
-import { Button } from "~/old/components/button";
-import { api } from "~/old/utils/api";
-import dayjs, { Dayjs, displayTime } from "~/old/utils/dayjs";
-import { createSSR } from "~/old/utils/ssr";
+import { cn } from "@acme/ui";
+import { Button } from "@acme/ui/button";
+import { Input } from "@acme/ui/input";
 
-export const getServerSideProps = createSSR(
-  z.object({
-    teamId: z.string().uuid(),
-  }),
-  async (ssr, { teamId }) => {
-    await ssr.teamMember.get.prefetch({ teamId });
-  },
-);
+import type { Dayjs } from "~/utils/dayjs";
+import { api } from "~/trpc/react";
+import dayjs, { displayTime } from "~/utils/dayjs";
 
 const allowedCsvHeaders = [
   "DIA",
@@ -31,9 +24,7 @@ type AllowedCsvHeaders = (typeof allowedCsvHeaders)[number];
 const isAllowedCsvHeader = (header: unknown): header is AllowedCsvHeaders =>
   allowedCsvHeaders.includes(header as AllowedCsvHeaders);
 
-const Import: NextPage<
-  InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ teamId }) => {
+export function Import({ teamId }: { teamId: string }) {
   const { back } = useRouter();
   const [file, setFile] = useState<File>();
   const [array, setArray] = useState<
@@ -134,10 +125,9 @@ const Import: NextPage<
 
   return (
     <>
-      <div className="flex"></div>
       <form onSubmit={handleOnSubmit}>
-        <input
-          type={"file"}
+        <Input
+          type="file"
           id={"csvFileInput"}
           accept={".csv"}
           onChange={handleOnChange}
@@ -162,7 +152,7 @@ const Import: NextPage<
         <thead>
           <tr>
             {allowedCsvHeaders.map((key, i) => (
-              <th key={i} className={clsx(i == 0 ? "w-32" : "w-20")}>
+              <th key={i} className={cn(i == 0 ? "w-32" : "w-20")}>
                 {key}
               </th>
             ))}
@@ -197,6 +187,4 @@ const Import: NextPage<
       )}
     </>
   );
-};
-
-export default Import;
+}

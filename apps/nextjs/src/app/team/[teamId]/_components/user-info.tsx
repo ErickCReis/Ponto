@@ -1,20 +1,22 @@
-import { redirect } from "next/navigation";
+import { RouterOutputs } from "@acme/api";
 
-import { api } from "~/trpc/server";
 import dayjs, { displayTime } from "~/utils/dayjs";
 
-export default async function Page({
-  params: { teamId, userId },
+type TeamMember = RouterOutputs["teamMember"]["get"];
+type History = RouterOutputs["timeRecord"]["history"];
+
+export function UserInfo({
+  teamId,
+  teamMember,
+  history,
 }: {
-  params: { teamId: string; userId: string };
+  teamId: string;
+  teamMember: TeamMember;
+  history: History;
 }) {
-  const teamMember = await api.teamMember.get({ teamId, userId });
-
   if (!teamMember) {
-    redirect(`/team/${teamId}/admin`);
+    return null;
   }
-
-  const history = await api.timeRecord.history({ teamId, userId });
 
   return (
     <>
@@ -49,16 +51,16 @@ export default async function Page({
         </div>
       </div>
 
-      <h2 className="text-xl font-semibold">Histórico</h2>
+      <h2 className="text-xl font-semibold">Relatório</h2>
 
       <div className="flex flex-col text-center">
-        <div className="flex font-semibold">
+        <div className="flex divide-x border-b border-primary font-semibold">
           <div className="flex-1">MÊS</div>
           <div className="flex-1">SALDO</div>
           <div className="flex-1">ACUMULADO</div>
         </div>
         {history?.map((month, i) => (
-          <div key={i} className="flex">
+          <div key={i} className="flex divide-x">
             <div className="flex-1">{month.label}</div>
             <div className="flex-1">
               {(month.balance / 1000 / 60 / 60).toFixed(1)} horas

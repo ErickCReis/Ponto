@@ -2,9 +2,9 @@ import { Suspense } from "react";
 
 import { api } from "~/trpc/server";
 import { displayTime } from "~/utils/dayjs";
-import { Clock } from "./_components/clock";
-import { MarkTime } from "./_components/mark-time";
-import { RegisteredTimes } from "./_components/registered-times";
+import { Clock } from "../_components/clock";
+import { MarkTime } from "../_components/mark-time";
+import { RegisteredTimes } from "../_components/registered-times";
 
 export const revalidate = 0;
 

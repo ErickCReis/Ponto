@@ -1,15 +1,18 @@
 import Link from "next/link";
 
 import { api } from "~/trpc/server";
+import { ViewTabs } from "./_components/view-tabs";
 
 export const revalidate = 0;
 
 export default async function Layout({
   params,
-  children,
+  tabs,
+  admin,
 }: {
   params: { teamId: string };
-  children: React.ReactNode;
+  tabs: React.ReactNode;
+  admin: React.ReactNode;
 }) {
   const team = await api.team.get(params.teamId);
 
@@ -25,7 +28,15 @@ export default async function Layout({
             {team.name}
           </h1>
         </Link>
-        {children}
+
+        {team.role === "ADMIN" ? (
+          admin
+        ) : (
+          <>
+            <ViewTabs teamId={team.id} />
+            {tabs}
+          </>
+        )}
       </div>
     </main>
   );

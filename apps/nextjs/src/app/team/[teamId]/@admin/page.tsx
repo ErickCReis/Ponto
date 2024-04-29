@@ -2,7 +2,6 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { auth } from "@acme/auth";
 import { Badge } from "@acme/ui/badge";
 import { Button } from "@acme/ui/button";
 
@@ -10,15 +9,10 @@ import { api } from "~/trpc/server";
 import { CopyText } from "./_components/copy-text";
 
 export default async function Page({ params }: { params: { teamId: string } }) {
-  const session = await auth();
   const team = await api.team.get(params.teamId);
 
   if (!team) {
     redirect("/");
-  }
-
-  if (team.role !== "ADMIN") {
-    redirect(`/team/${team.id}`);
   }
 
   const host = headers().get("host") ?? "";
@@ -40,11 +34,11 @@ export default async function Page({ params }: { params: { teamId: string } }) {
             key={member.id}
             asChild
           >
-            <Link href={`/team/${team.id}/admin/${member.id}`}>
+            <Link href={`/team/${team.id}/user/${member.id}`}>
               <Badge
                 variant={member.role === "ADMIN" ? "default" : "secondary"}
               >
-                {member.id === session?.user.id ? "VOCÊ" : member.role}
+                {member.role}
               </Badge>
               <span>{member.name}</span>
               <div className="flex-1"></div>

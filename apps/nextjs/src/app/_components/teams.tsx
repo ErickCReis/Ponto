@@ -27,13 +27,7 @@ export async function Teams() {
                 key={team.id}
                 asChild
               >
-                <Link
-                  href={
-                    team.role === "ADMIN"
-                      ? `/team/${team.id}/admin`
-                      : `/team/${team.id}`
-                  }
-                >
+                <Link href={`/team/${team.id}`}>
                   <Badge
                     variant={team.role === "ADMIN" ? "default" : "secondary"}
                   >

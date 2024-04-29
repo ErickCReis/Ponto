@@ -2,19 +2,27 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, ChevronLeft, ChevronRight, FileUp } from "lucide-react";
 
 import { RouterOutputs } from "@acme/api";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
 import { Calendar } from "@acme/ui/calendar";
+import { Dialog, DialogContent, DialogTrigger } from "@acme/ui/dialog";
 import { Form, FormControl, FormField, FormItem, useForm } from "@acme/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@acme/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@acme/ui/tooltip";
 import { CreateTimeRecordSchema } from "@acme/validators";
 
 import { useConfirmClick } from "~/hooks/use-confirm-click";
 import { api } from "~/trpc/react";
 import dayjs, { Dayjs, displayTime } from "~/utils/dayjs";
+import { Import } from "./_components/import";
 
 type TimeRecord = RouterOutputs["timeRecord"]["all"][number];
 
@@ -224,36 +232,57 @@ export default function Page({
 
   return (
     <>
-      <h2 className="flex border-b border-primary text-xl font-semibold">
-        <Link
-          className="ml-auto text-xl font-semibold"
-          href={`/team/${teamId}/${prev.format("YYYY")}/${prev.format("MM")}`}
-        >
-          {"<"}
-        </Link>
-        <div className="px-8 text-center uppercase">
-          {date.format("MMMM [de] YYYY")}
+      <div className="flex flex-wrap justify-between">
+        <div className="flex items-center gap-2">
+          <Button asChild size="icon" variant="outline">
+            <Link
+              className="text-xl font-semibold"
+              href={`/team/${teamId}/history/${prev.format("YYYY")}/${prev.format("MM")}`}
+            >
+              <ChevronLeft />
+            </Link>
+          </Button>
+          <Button asChild size="icon" variant="outline">
+            <Link
+              className="text-xl font-semibold"
+              href={`/team/${teamId}/history/${next.format("YYYY")}/${next.format("MM")}`}
+            >
+              <ChevronRight />
+            </Link>
+          </Button>
+          <div className="text-center uppercase">
+            {date.format("MMMM [de] YYYY")}
+          </div>
         </div>
-        <Link
-          className="mr-auto text-xl font-semibold"
-          href={`/team/${teamId}/${next.format("YYYY")}/${next.format("MM")}`}
-        >
-          {">"}
-        </Link>
-      </h2>
-      <div className="flex">
-        <AddTime teamId={teamId} date={date} />
-        {/* <Link href={`/team/${teamId}/import`}>Importar planilha Kayo</Link> */}
+        <div className="flex items-center gap-2">
+          <AddTime teamId={teamId} date={date} />
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <Dialog>
+                <TooltipTrigger asChild>
+                  <DialogTrigger asChild>
+                    <Button size="icon" variant="outline">
+                      <FileUp />
+                    </Button>
+                  </DialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Importar planilha</TooltipContent>
+                <DialogContent>
+                  <Import teamId={teamId} />
+                </DialogContent>
+              </Dialog>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </div>
 
       <div className="flex flex-col">
-        <div className="flex gap-4 text-center">
+        <div className="mb-2 flex justify-center gap-4 border-b border-primary text-center font-semibold">
           <div className="w-10">DIA</div>
           <div className="flex-1">PONTOS</div>
           <div className="w-16">TOTAL</div>
           <div className="w-16">SALDO</div>
         </div>
-        <div className="h-2"></div>
         {Object.entries(groupByDay).map(([day, times]) => (
           <DayRow
             key={day}
