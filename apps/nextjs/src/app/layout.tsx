@@ -20,7 +20,7 @@ export const preferredRegion = ["iad1"];
 export const metadata: Metadata = {
   metadataBase: new URL(
     env.VERCEL_ENV === "production"
-      ? "ponto-six.vercel.app"
+      ? "https://ponto-six.vercel.app"
       : "http://localhost:3000",
   ),
   title: "Ponto",
