@@ -2,40 +2,31 @@
   "name": "create-t3-turbo",
   "private": true,
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.12.0"
   },
-  "packageManager": "pnpm@7.27.0",
+  "packageManager": "pnpm@9.0.6",
   "scripts": {
     "build": "turbo build",
-    "clean": "rm -rf node_modules",
+    "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
-    "db:generate": "turbo db:generate",
-    "db:push": "turbo db:push db:generate",
+    "db:push": "pnpm -F db push",
+    "db:studio": "pnpm -F db studio",
     "dev": "turbo dev --parallel",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "lint": "turbo lint && manypkg check",
-    "type-check": "turbo type-check"
+    "format": "turbo format --continue -- --cache --cache-location node_modules/.cache/.prettiercache",
+    "format:fix": "turbo format --continue -- --write --cache --cache-location node_modules/.cache/.prettiercache",
+    "lint": "turbo lint --continue -- --cache --cache-location node_modules/.cache/.eslintcache",
+    "lint:fix": "turbo lint --continue -- --fix --cache --cache-location node_modules/.cache/.eslintcache",
+    "lint:ws": "pnpm dlx sherif@latest",
+    "postinstall": "pnpm lint:ws",
+    "typecheck": "turbo typecheck",
+    "ui-add": "pnpm -F ui ui-add"
   },
-  "dependencies": {
-    "@ianvs/prettier-plugin-sort-imports": "^3.7.1",
-    "@manypkg/cli": "^0.20.0",
-    "@types/eslint": "^8.21.0",
-    "@typescript-eslint/eslint-plugin": "^5.49.0",
-    "@typescript-eslint/parser": "^5.49.0",
-    "eslint": "^8.33.0",
-    "eslint-config-prettier": "^8.6.0",
-    "prettier": "^2.8.3",
-    "prettier-plugin-tailwindcss": "^0.2.2",
-    "turbo": "^1.7.4",
-    "typescript": "^4.9.5"
+  "devDependencies": {
+    "@acme/prettier-config": "workspace:*",
+    "@turbo/gen": "^1.13.3",
+    "prettier": "^3.2.5",
+    "turbo": "^1.13.3",
+    "typescript": "^5.4.5"
   },
-  "pnpm": {
-    "packageExtensions": {
-      "eslint-config-next@*": {
-        "dependencies": {
-          "next": "*"
-        }
-      }
-    }
-  }
+  "prettier": "@acme/prettier-config"
 }

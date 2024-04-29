@@ -1,58 +1,76 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { and, eq, schema } from "@acme/db";
+import { CreateTeamSchema } from "@acme/validators";
 
-export const teamRouter = createTRPCRouter({
+import { protectedProcedure } from "../trpc";
+
+export const teamRouter = {
   all: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.teamMember.findMany({
-      include: {
-        team: true,
-      },
-      where: {
-        userId: ctx.token.user.id,
-      },
-    });
+    return ctx.db
+      .select({
+        id: schema.team.id,
+        name: schema.team.name,
+        role: schema.teamMember.role,
+      })
+      .from(schema.team)
+      .innerJoin(
+        schema.teamMember,
+        eq(schema.team.id, schema.teamMember.teamId),
+      )
+      .where(eq(schema.teamMember.userId, ctx.session.user.id))
+      .orderBy(schema.teamMember.role);
   }),
   get: protectedProcedure
-    .input(z.string().cuid())
+    .input(z.string().uuid())
     .query(async ({ ctx, input }) => {
-      const team = await ctx.prisma.team.findFirst({
-        include: {
-          TeamMember: true,
-        },
-        where: {
-          id: input,
-          TeamMember: {
-            some: {
-              userId: ctx.token.user.id,
-            },
-          },
-        },
-      });
+      const team = await ctx.db
+        .select({
+          id: schema.team.id,
+          name: schema.team.name,
+          role: schema.teamMember.role,
+        })
+        .from(schema.team)
+        .innerJoin(
+          schema.teamMember,
+          eq(schema.team.id, schema.teamMember.teamId),
+        )
+        .where(
+          and(
+            eq(schema.team.id, input),
+            eq(schema.teamMember.userId, ctx.session.user.id),
+          ),
+        )
+        .limit(1);
 
-      return team;
+      return team[0];
     }),
   create: protectedProcedure
-    .input(
-      z.object({
-        name: z.string(),
-      }),
-    )
+    .input(CreateTeamSchema)
     .mutation(async ({ ctx, input }) => {
-      const team = await ctx.prisma.team.create({
-        data: {
+      const res = await ctx.db
+        .insert(schema.team)
+        .values({
           name: input.name,
-        },
-      });
+        })
+        .returning();
 
-      await ctx.prisma.teamMember.create({
-        data: {
-          teamId: team.id,
-          userId: ctx.token.user.id,
-          role: "ADMIN",
-        },
+      const team = res[0];
+
+      if (!team) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Time não encontrado",
+        });
+      }
+
+      await ctx.db.insert(schema.teamMember).values({
+        teamId: team.id,
+        userId: ctx.session.user.id,
+        role: "ADMIN",
       });
 
       return team;
     }),
-});
+};

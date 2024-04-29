@@ -1,14 +1,15 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { and, eq, schema } from "@acme/db";
+import { CreateTeamMemberSchema } from "@acme/validators";
 
-export const teamMemberRouter = createTRPCRouter({
+import { protectedProcedure } from "../trpc";
+
+export const teamMemberRouter = {
   all: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    const team = await ctx.prisma.team.findUnique({
-      where: {
-        id: input,
-      },
+    const team = await ctx.db.query.team.findFirst({
+      where: eq(schema.team.id, input),
     });
 
     if (!team) {
@@ -18,13 +19,11 @@ export const teamMemberRouter = createTRPCRouter({
       });
     }
 
-    const teamMember = await ctx.prisma.teamMember.findUnique({
-      where: {
-        teamId_userId: {
-          teamId: team.id,
-          userId: ctx.token.user.id,
-        },
-      },
+    const teamMember = await ctx.db.query.teamMember.findFirst({
+      where: and(
+        eq(schema.teamMember.teamId, team.id),
+        eq(schema.teamMember.userId, ctx.session.user.id),
+      ),
     });
 
     if (teamMember?.role !== "ADMIN") {
@@ -34,30 +33,35 @@ export const teamMemberRouter = createTRPCRouter({
       });
     }
 
-    const teamMembers = await ctx.prisma.teamMember.findMany({
-      include: {
-        user: true,
-      },
-      where: {
-        teamId: input,
-      },
-    });
+    const teamMembers = await ctx.db
+      .select({
+        id: schema.users.id,
+        name: schema.users.name,
+        role: schema.teamMember.role,
+      })
+      .from(schema.users)
+      .innerJoin(
+        schema.teamMember,
+        eq(schema.teamMember.userId, schema.users.id),
+      )
+      .where(eq(schema.teamMember.teamId, team.id));
 
     return teamMembers;
   }),
   get: protectedProcedure
     .input(
       z.object({
-        userId: z.string().cuid().optional(),
-        teamId: z.string().cuid(),
+        userId: z.string().uuid().optional(),
+        teamId: z.string().uuid(),
       }),
     )
     .query(async ({ ctx, input }) => {
       if (input.userId) {
-        const teamMember = await ctx.prisma.teamMember.findUnique({
-          where: {
-            teamId_userId: { userId: ctx.token.user.id, teamId: input.teamId },
-          },
+        const teamMember = await ctx.db.query.teamMember.findFirst({
+          where: and(
+            eq(schema.teamMember.teamId, input.teamId),
+            eq(schema.teamMember.userId, ctx.session.user.id),
+          ),
         });
 
         if (!teamMember) {
@@ -75,31 +79,35 @@ export const teamMemberRouter = createTRPCRouter({
         }
       }
 
-      return ctx.prisma.teamMember.findUnique({
-        include: {
-          user: true,
-        },
-        where: {
-          teamId_userId: {
-            userId: input.userId ?? ctx.token.user.id,
-            teamId: input.teamId,
-          },
-        },
-      });
+      const user = await ctx.db
+        .select({
+          id: schema.users.id,
+          name: schema.users.name,
+          email: schema.users.email,
+          role: schema.teamMember.role,
+          dailyWorkload: schema.teamMember.dailyWorkload,
+          createdAt: schema.teamMember.createdAt,
+        })
+        .from(schema.users)
+        .innerJoin(
+          schema.teamMember,
+          eq(schema.teamMember.userId, schema.users.id),
+        )
+        .where(
+          and(
+            eq(schema.teamMember.teamId, input.teamId),
+            eq(schema.teamMember.userId, input.userId ?? ctx.session.user.id),
+          ),
+        )
+        .limit(1);
+
+      return user[0];
     }),
   create: protectedProcedure
-    .input(
-      z.object({
-        teamId: z.string().cuid(),
-        dailyWorkload: z.number().min(1).max(24).default(8),
-        initialBalanceInMinutes: z.number().default(0),
-      }),
-    )
+    .input(CreateTeamMemberSchema)
     .mutation(async ({ ctx, input }) => {
-      const team = await ctx.prisma.team.findUnique({
-        where: {
-          id: input.teamId,
-        },
+      const team = await ctx.db.query.team.findFirst({
+        where: eq(schema.team.id, input.teamId),
       });
 
       if (!team) {
@@ -109,13 +117,11 @@ export const teamMemberRouter = createTRPCRouter({
         });
       }
 
-      const teamMember = await ctx.prisma.teamMember.findUnique({
-        where: {
-          teamId_userId: {
-            teamId: team.id,
-            userId: ctx.token.user.id,
-          },
-        },
+      const teamMember = await ctx.db.query.teamMember.findFirst({
+        where: and(
+          eq(schema.teamMember.teamId, team.id),
+          eq(schema.teamMember.userId, ctx.session.user.id),
+        ),
       });
 
       if (teamMember) {
@@ -125,14 +131,12 @@ export const teamMemberRouter = createTRPCRouter({
         });
       }
 
-      await ctx.prisma.teamMember.create({
-        data: {
-          teamId: team.id,
-          userId: ctx.token.user.id,
-          role: "MEMBER",
-          dailyWorkload: input.dailyWorkload,
-          initialBalanceInMinutes: input.initialBalanceInMinutes,
-        },
+      await ctx.db.insert(schema.teamMember).values({
+        teamId: team.id,
+        userId: ctx.session.user.id,
+        role: "MEMBER",
+        dailyWorkload: input.dailyWorkload,
+        initialBalanceInMinutes: input.initialBalanceInMinutes,
       });
 
       return team;
@@ -140,19 +144,17 @@ export const teamMemberRouter = createTRPCRouter({
   update: protectedProcedure
     .input(
       z.object({
-        teamId: z.string().cuid(),
+        teamId: z.string().uuid(),
         dailyWorkload: z.number().min(1).max(24).optional(),
         initialBalanceInMinutes: z.number().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const teamMember = await ctx.prisma.teamMember.findUnique({
-        where: {
-          teamId_userId: {
-            teamId: input.teamId,
-            userId: ctx.token.user.id,
-          },
-        },
+      const teamMember = await ctx.db.query.teamMember.findFirst({
+        where: and(
+          eq(schema.teamMember.teamId, input.teamId),
+          eq(schema.teamMember.userId, ctx.session.user.id),
+        ),
       });
 
       if (!teamMember) {
@@ -162,19 +164,19 @@ export const teamMemberRouter = createTRPCRouter({
         });
       }
 
-      await ctx.prisma.teamMember.update({
-        where: {
-          teamId_userId: {
-            teamId: input.teamId,
-            userId: ctx.token.user.id,
-          },
-        },
-        data: {
+      await ctx.db
+        .update(schema.teamMember)
+        .set({
           dailyWorkload: input.dailyWorkload,
           initialBalanceInMinutes: input.initialBalanceInMinutes,
-        },
-      });
+        })
+        .where(
+          and(
+            eq(schema.teamMember.teamId, input.teamId),
+            eq(schema.teamMember.userId, ctx.session.user.id),
+          ),
+        );
 
       return teamMember;
     }),
-});
+};
