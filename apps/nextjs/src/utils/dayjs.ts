@@ -1,4 +1,5 @@
-import lib, { ConfigType, Dayjs, OptionType } from "dayjs";
+import type { ConfigType, OptionType } from "dayjs";
+import lib, { Dayjs } from "dayjs";
 import ptbr from "dayjs/locale/pt-br";
 import minMax from "dayjs/plugin/minMax";
 import timezone from "dayjs/plugin/timezone";

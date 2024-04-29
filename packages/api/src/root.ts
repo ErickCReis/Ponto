@@ -1,4 +1,3 @@
-
 import { authRouter } from "./router/auth";
 import { teamRouter } from "./router/team";
 import { teamMemberRouter } from "./router/team-member";

@@ -16,5 +16,5 @@ export default async function Page({
 
   const history = await api.timeRecord.history({ teamId, userId });
 
-  return <UserInfo teamId={teamId} teamMember={teamMember} history={history} />;
+  return <UserInfo teamMember={teamMember} history={history} />;
 }

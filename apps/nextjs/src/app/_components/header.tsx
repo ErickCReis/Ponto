@@ -3,7 +3,7 @@ import Link from "next/link";
 import { auth, signIn, signOut } from "@acme/auth";
 import { Button } from "@acme/ui/button";
 
-export async function Header() {
+export function Header() {
   return (
     <div className="flex items-end justify-between py-4">
       <Link

@@ -25,7 +25,7 @@ const isAllowedCsvHeader = (header: unknown): header is AllowedCsvHeaders =>
   allowedCsvHeaders.includes(header as AllowedCsvHeaders);
 
 export function Import({ teamId }: { teamId: string }) {
-  const { back } = useRouter();
+  const router = useRouter();
   const [file, setFile] = useState<File>();
   const [array, setArray] = useState<
     Record<AllowedCsvHeaders, Dayjs | undefined>[]
@@ -34,7 +34,7 @@ export function Import({ teamId }: { teamId: string }) {
 
   const { mutate } = api.timeRecord.batch.useMutation({
     onSuccess: () => {
-      back();
+      router.back();
     },
   });
 
@@ -89,7 +89,6 @@ export function Import({ teamId }: { teamId: string }) {
 
             object[header] = date;
           } else {
-            if (!date) return object;
             const [hour, minute] = value.split(":");
             if (!hour || !minute) {
               object[header] = undefined;

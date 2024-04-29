@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { and, eq, schema } from "@acme/db";
@@ -55,7 +56,14 @@ export const teamRouter = {
         })
         .returning();
 
-      const team = res[0]!;
+      const team = res[0];
+
+      if (!team) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Time não encontrado",
+        });
+      }
 
       await ctx.db.insert(schema.teamMember).values({
         teamId: team.id,

@@ -4,7 +4,7 @@ import { appRouter, createTRPCContext } from "@acme/api";
 import { auth } from "@acme/auth";
 
 export const runtime = "edge";
-export const preferredRegion = ["iad1"]
+export const preferredRegion = ["iad1"];
 
 /**
  * Configure basic CORS headers

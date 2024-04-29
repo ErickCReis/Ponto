@@ -10,7 +10,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 
 import "~/app/globals.css";
 
-import { env } from "~/env.mjs";
+import { env } from "~/env";
 import { Header } from "./_components/header";
 
 export const runtime = "edge";

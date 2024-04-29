@@ -39,11 +39,6 @@ export const timeRecordRouter = {
           userId: true,
           time: true,
         },
-        // where: {
-        //   userId: input.userId ?? ctx.session.user.id,
-        //   time: { gte: input?.start, lte: input?.end },
-        //   teamId: input.teamId,
-        // },
         where: and(
           eq(schema.timeRecord.teamId, input.teamId),
           eq(schema.timeRecord.userId, input.userId ?? ctx.session.user.id),
@@ -125,22 +120,24 @@ export const timeRecordRouter = {
         orderBy: schema.timeRecord.time,
       });
 
-      const groupByYearMonthDay =
-        timeRecords?.reduce(
-          (acc, timeRecord) => {
-            const day = timeRecord.time.getDate();
-            const month = timeRecord.time.getMonth();
-            const year = timeRecord.time.getFullYear();
+      const groupByYearMonthDay = timeRecords.reduce(
+        (acc, timeRecord) => {
+          const day = timeRecord.time.getDate();
+          const month = timeRecord.time.getMonth();
+          const year = timeRecord.time.getFullYear();
 
-            if (!acc[year]) acc[year] = {};
-            if (!acc[year]?.[month]) acc[year]![month] = {};
-            if (!acc[year]?.[month]?.[day]) acc[year]![month]![day] = [];
+          if (!acc[year]) acc[year] = {};
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          if (!acc[year]?.[month]) acc[year]![month] = {};
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          if (!acc[year]?.[month]?.[day]) acc[year]![month]![day] = [];
 
-            acc[year]![month]![day]!.push(timeRecord.time);
-            return acc;
-          },
-          {} as Record<number, Record<number, Record<number, Date[]>>>,
-        ) ?? {};
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          acc[year]![month]![day]!.push(timeRecord.time);
+          return acc;
+        },
+        {} as Record<number, Record<number, Record<number, Date[]>>>,
+      );
 
       const historyResult: {
         label: string;

@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { CalendarIcon, ChevronLeft, ChevronRight, FileUp } from "lucide-react";
 
-import { RouterOutputs } from "@acme/api";
+import type { RouterOutputs } from "@acme/api";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
 import { Calendar } from "@acme/ui/calendar";
@@ -19,9 +19,10 @@ import {
 } from "@acme/ui/tooltip";
 import { CreateTimeRecordSchema } from "@acme/validators";
 
+import type { Dayjs } from "~/utils/dayjs";
 import { useConfirmClick } from "~/hooks/use-confirm-click";
 import { api } from "~/trpc/react";
-import dayjs, { Dayjs, displayTime } from "~/utils/dayjs";
+import dayjs, { displayTime } from "~/utils/dayjs";
 import { Import } from "./_components/import";
 
 type TimeRecord = RouterOutputs["timeRecord"]["all"][number];
@@ -159,17 +160,10 @@ const AddTime: React.FC<{ teamId: string; date: Dayjs }> = ({
                   <PopoverTrigger asChild>
                     <Button
                       variant={"outline"}
-                      className={cn(
-                        "justify-start rounded-r-none text-left font-normal",
-                        !field.value && "text-muted-foreground",
-                      )}
+                      className="justify-start rounded-r-none text-left font-normal"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? (
-                        displayTime({ date: field.value, format: "DD/MM/YYYY" })
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
+                      {displayTime({ date: field.value, format: "DD/MM/YYYY" })}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">

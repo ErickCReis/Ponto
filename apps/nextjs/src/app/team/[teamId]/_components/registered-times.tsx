@@ -22,7 +22,7 @@ export function RegisteredTimes({ teamId }: { teamId: string }) {
     <div className="flex flex-col items-center gap-4">
       <h2 className="text-xl font-semibold">Pontos registrados</h2>
       <div className="flex flex-col items-center">
-        {timeRecords?.map((timeRecord) => (
+        {timeRecords.map((timeRecord) => (
           <div key={timeRecord.id} className="flex items-center">
             <div className="w-2" />
             <div>{displayTime({ date: timeRecord.time })}</div>

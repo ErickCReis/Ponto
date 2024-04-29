@@ -35,8 +35,8 @@ export default function Page({
   });
 
   const createTeamMember = api.teamMember.create.useMutation({
-    onSuccess: async (team) => {
-      await router.push(`/team/${team.id}`);
+    onSuccess: (team) => {
+      router.push(`/team/${team.id}`);
     },
     onError: (err) => {
       toast.error(err.message);
