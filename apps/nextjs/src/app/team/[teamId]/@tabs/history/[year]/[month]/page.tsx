@@ -2,23 +2,14 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { CalendarIcon, ChevronLeft, ChevronRight, FileUp } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileUp } from "lucide-react";
 
 import type { RouterOutputs } from "@acme/api";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
 import { Calendar } from "@acme/ui/calendar";
 import { Dialog, DialogContent, DialogTrigger } from "@acme/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  useForm,
-} from "@acme/ui/form";
+import { Form, FormControl, FormField, FormItem, useForm } from "@acme/ui/form";
 import { Input } from "@acme/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@acme/ui/popover";
 import {
@@ -204,8 +195,12 @@ const AddTime: React.FC<{ teamId: string; date: Dayjs }> = ({
                     onChange={(selectedTime) => {
                       const currentTime = field.value;
                       currentTime.setHours(
-                        parseInt(selectedTime.target.value.split(":")[0]),
-                        parseInt(selectedTime.target.value.split(":")[1]),
+                        parseInt(
+                          selectedTime.target.value.split(":")[0] ?? "0",
+                        ),
+                        parseInt(
+                          selectedTime.target.value.split(":")[1] ?? "0",
+                        ),
                         0,
                       );
                       field.onChange(currentTime);

@@ -2,7 +2,8 @@ import type { DefaultSession, NextAuthConfig } from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import Discord from "next-auth/providers/discord";
 
-import { db, schema } from "@acme/db";
+import { schema } from "@acme/db";
+import { db } from "@acme/db/client";
 
 declare module "next-auth" {
   interface Session {

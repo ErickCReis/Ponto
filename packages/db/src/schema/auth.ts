@@ -1,31 +1,48 @@
-import { integer, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import {
+  integer,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 import { pgSqlTable } from "./_table";
 
 export const users = pgSqlTable("user", {
-  id: text("id").notNull().primaryKey(),
-  name: text("name"),
-  email: text("email").notNull(),
-  emailVerified: timestamp("emailVerified", { mode: "date" }),
-  image: text("image"),
+  id: uuid("id").notNull().primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }),
+  email: varchar("email", { length: 255 }).notNull(),
+  emailVerified: timestamp("emailVerified", {
+    mode: "date",
+    withTimezone: true,
+  }),
+  image: varchar("image", { length: 255 }),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+}));
 
 export const accounts = pgSqlTable(
   "account",
   {
-    userId: text("userId")
+    userId: uuid("userId")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    type: text("type").notNull(),
-    provider: text("provider").notNull(),
-    providerAccountId: text("providerAccountId").notNull(),
-    refresh_token: text("refresh_token"),
+    type: varchar("type", { length: 255 })
+      .$type<"email" | "oauth" | "oidc" | "webauthn">()
+      .notNull(),
+    provider: varchar("provider", { length: 255 }).notNull(),
+    providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
+    refresh_token: varchar("refresh_token", { length: 255 }),
     access_token: text("access_token"),
     expires_at: integer("expires_at"),
-    token_type: text("token_type"),
-    scope: text("scope"),
+    token_type: varchar("token_type", { length: 255 }),
+    scope: varchar("scope", { length: 255 }),
     id_token: text("id_token"),
-    session_state: text("session_state"),
+    session_state: varchar("session_state", { length: 255 }),
   },
   (account) => ({
     compoundKey: primaryKey({
@@ -34,20 +51,34 @@ export const accounts = pgSqlTable(
   }),
 );
 
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, { fields: [accounts.userId], references: [users.id] }),
+}));
+
 export const sessions = pgSqlTable("session", {
-  sessionToken: text("sessionToken").notNull().primaryKey(),
-  userId: text("userId")
+  sessionToken: varchar("sessionToken", { length: 255 }).notNull().primaryKey(),
+  userId: uuid("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  expires: timestamp("expires", { mode: "date" }).notNull(),
+  expires: timestamp("expires", {
+    mode: "date",
+    withTimezone: true,
+  }).notNull(),
 });
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, { fields: [sessions.userId], references: [users.id] }),
+}));
 
 export const verificationTokens = pgSqlTable(
   "verificationToken",
   {
     identifier: text("identifier").notNull(),
-    token: text("token").notNull(),
-    expires: timestamp("expires", { mode: "date" }).notNull(),
+    token: varchar("token", { length: 255 }).notNull(),
+    expires: timestamp("expires", {
+      mode: "date",
+      withTimezone: true,
+    }).notNull(),
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
