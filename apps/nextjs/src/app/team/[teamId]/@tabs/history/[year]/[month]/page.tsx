@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { CalendarIcon, ChevronLeft, ChevronRight, FileUp } from "lucide-react";
 
@@ -9,7 +9,17 @@ import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
 import { Calendar } from "@acme/ui/calendar";
 import { Dialog, DialogContent, DialogTrigger } from "@acme/ui/dialog";
-import { Form, FormControl, FormField, FormItem, useForm } from "@acme/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useForm,
+} from "@acme/ui/form";
+import { Input } from "@acme/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@acme/ui/popover";
 import {
   Tooltip,
@@ -102,22 +112,19 @@ const DayRow: React.FC<{
         ))}
       </div>
 
-      {balanceTime && (
-        <div className={"w-16 font-semibold"}>
-          {displayTime({ date: totalTime })}
-        </div>
-      )}
+      <div className={cn("w-16 font-semibold", !balanceTime && "text-red-500")}>
+        {balanceTime ? displayTime({ date: totalTime }) : "--"}
+      </div>
 
-      {balanceTime && (
-        <div
-          className={cn(
-            "w-16 font-semibold",
-            hasDebit ? "text-red-500" : "text-green-500",
-          )}
-        >
-          {displayTime({ date: balanceTime })}
-        </div>
-      )}
+      <div
+        className={cn(
+          "w-16 font-semibold",
+          hasDebit ? "text-red-500" : "text-green-500",
+          !balanceTime && "text-red-500",
+        )}
+      >
+        {balanceTime ? displayTime({ date: balanceTime }) : "--"}
+      </div>
     </div>
   );
 };
@@ -126,6 +133,7 @@ const AddTime: React.FC<{ teamId: string; date: Dayjs }> = ({
   teamId,
   date,
 }) => {
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const utils = api.useUtils();
 
   const createTimeRecord = api.timeRecord.create.useMutation({
@@ -155,27 +163,56 @@ const AddTime: React.FC<{ teamId: string; date: Dayjs }> = ({
           name="time"
           render={({ field }) => (
             <FormItem>
-              <FormControl>
-                <Popover>
-                  <PopoverTrigger asChild>
+              <Popover
+                open={calendarOpen}
+                onOpenChange={(open) => setCalendarOpen(open)}
+              >
+                <PopoverTrigger asChild>
+                  <FormControl>
                     <Button
-                      variant={"outline"}
-                      className="justify-start rounded-r-none text-left font-normal"
+                      variant="outline"
+                      className="w-full rounded-r-none pl-3 text-left font-normal"
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {displayTime({ date: field.value, format: "DD/MM/YYYY" })}
+                      {displayTime({
+                        date: field.value,
+                        format: "DD/MM/YYYY • HH[h]mm",
+                      })}
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </FormControl>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto">
+                  <Calendar
+                    className="p-0"
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date > new Date() || date < new Date("1900-01-01")
+                    }
+                    initialFocus
+                  />
+                  <Input
+                    type="time"
+                    className="mt-2"
+                    // take locale date time string in format that the input expects (24hr time)
+                    value={field.value.toLocaleTimeString([], {
+                      hourCycle: "h23",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    // take hours and minutes and update our Date object then change date object to our new value
+                    onChange={(selectedTime) => {
+                      const currentTime = field.value;
+                      currentTime.setHours(
+                        parseInt(selectedTime.target.value.split(":")[0]),
+                        parseInt(selectedTime.target.value.split(":")[1]),
+                        0,
+                      );
+                      field.onChange(currentTime);
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
             </FormItem>
           )}
         />

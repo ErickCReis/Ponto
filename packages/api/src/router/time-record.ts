@@ -171,8 +171,10 @@ export const timeRecordRouter = {
           );
 
           lastMonthBalance += monthBalance;
+
+          const label = `${year}/${(Number(month) + 1).toString().padStart(2, "0")}`;
           historyResult.push({
-            label: `${year}/${Number(month) + 1}`,
+            label,
             balance: monthBalance,
             accumulatedBalance: lastMonthBalance,
           });

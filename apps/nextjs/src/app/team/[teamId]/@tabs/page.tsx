@@ -6,8 +6,6 @@ import { Clock } from "../_components/clock";
 import { MarkTime } from "../_components/mark-time";
 import { RegisteredTimes } from "../_components/registered-times";
 
-export const revalidate = 0;
-
 export default async function Page({ params }: { params: { teamId: string } }) {
   const team = await api.team.get(params.teamId);
 

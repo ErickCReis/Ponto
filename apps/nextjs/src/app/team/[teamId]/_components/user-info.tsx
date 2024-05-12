@@ -16,37 +16,26 @@ export function UserInfo({
     return null;
   }
 
+  const info = {
+    Nome: teamMember.name,
+    Email: teamMember.email,
+    Cargo: teamMember.role,
+    Entrada: displayTime({
+      date: dayjs(teamMember.createdAt),
+      format: "DD/MM/YYYY",
+    }),
+  };
+
   return (
     <>
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-4">
-          <div className="font-semibold">Nome</div>
-          <div className=" flex-1 border-b border-dashed border-primary"></div>
-          <div>{teamMember.name}</div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="font-semibold">Email</div>
-          <div className=" flex-1 border-b border-dashed border-primary"></div>
-          <div>{teamMember.email}</div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="font-semibold">Cargo</div>
-          <div className=" flex-1 border-b border-dashed border-primary"></div>
-          <div>{teamMember.role}</div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="font-semibold">Entrada</div>
-          <div className=" flex-1 border-b border-dashed border-primary"></div>
-          <div>
-            {displayTime({
-              date: dayjs(teamMember.createdAt),
-              format: "DD/MM/YYYY",
-            })}
+        {Object.entries(info).map(([key, value]) => (
+          <div key={key} className="flex items-center gap-4">
+            <div className="font-semibold">{key}</div>
+            <div className=" flex-1 border-b border-dashed border-secondary"></div>
+            <div>{value}</div>
           </div>
-        </div>
+        ))}
       </div>
 
       <h2 className="text-xl font-semibold">Relatório</h2>
