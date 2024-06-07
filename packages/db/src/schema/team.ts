@@ -1,8 +1,8 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  index,
   pgEnum,
   serial,
-  text,
   timestamp,
   unique,
   uuid,
@@ -16,7 +16,7 @@ export const timeRecord = pgSqlTable(
   "time_record",
   {
     id: serial("id").primaryKey(),
-    userId: text("user_id").notNull(),
+    userId: uuid("user_id").notNull(),
     teamId: uuid("team_id").notNull(),
     time: timestamp("time")
       .default(sql`CURRENT_TIMESTAMP`)
@@ -25,10 +25,10 @@ export const timeRecord = pgSqlTable(
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
   },
-  // (timeRecord) => ({
-  //   userIdIdx: index("user_id_idx").on(timeRecord.userId),
-  //   teamIdIdx: index("team_id_idx").on(timeRecord.teamId),
-  // }),
+  (timeRecord) => ({
+    userIdIdx: index("user_id_idx").on(timeRecord.userId),
+    teamIdIdx: index("team_id_idx").on(timeRecord.teamId),
+  }),
 );
 
 export const timeRecordRelations = relations(timeRecord, ({ one }) => ({
@@ -56,7 +56,7 @@ export const teamMember = pgSqlTable(
   {
     id: serial("id").primaryKey(),
     teamId: uuid("team_id").notNull(),
-    userId: text("user_id").notNull(),
+    userId: uuid("user_id").notNull(),
     role: roleEnum("role").notNull(),
     dailyWorkload: serial("daily_workload").notNull(),
     initialBalanceInMinutes: serial("initial_balance_in_minutes").notNull(),
@@ -67,8 +67,8 @@ export const teamMember = pgSqlTable(
   },
   (teamMember) => ({
     unique: unique().on(teamMember.teamId, teamMember.userId),
-    // teamIdIdx: index("team_id_idx").on(teamMember.teamId),
-    // userIdIdx: index("user_id_idx").on(teamMember.userId),
+    teamIdIdx: index("team_id_idx").on(teamMember.teamId),
+    userIdIdx: index("user_id_idx").on(teamMember.userId),
   }),
 );
 
