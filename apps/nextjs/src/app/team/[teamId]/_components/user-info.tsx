@@ -32,7 +32,7 @@ export function UserInfo({
         {Object.entries(info).map(([key, value]) => (
           <div key={key} className="flex items-center gap-4">
             <div className="font-semibold">{key}</div>
-            <div className=" flex-1 border-b border-dashed border-secondary"></div>
+            <div className="flex-1 border-b border-dashed border-secondary"></div>
             <div>{value}</div>
           </div>
         ))}
